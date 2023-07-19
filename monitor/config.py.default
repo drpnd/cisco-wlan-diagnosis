@@ -1,0 +1,5 @@
+MYSQL_HOST = 'db'
+MYSQL_USER = 'example'
+MYSQL_PASSWD= 'mypassword'
+MYSQL_DATABASE = 'mydatabase'
+
