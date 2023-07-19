@@ -28,8 +28,11 @@ OID_APNAME = '.1.3.6.1.4.1.9.9.513.1.1.1.1.5' # cLApEntry
 OID_APREMOVE = '.1.3.6.1.4.1.14179.2.6.3.8' # bsnAPDisassociated
 OID_DFS_DETECTED = '.1.3.6.1.4.1.14179.2.6.3.81' # bsnRadarChannelDetected
 OID_DFS_CLEARED = '.1.3.6.1.4.1.14179.2.6.3.82' # bsnRadarChannelCleared
-OID_BSNMAC = '.1.3.6.1.4.1.14179.2.6.2.20.0' # bsnAPMacAddrTrapVariable
+OID_BSNMACTRAP = '.1.3.6.1.4.1.14179.2.6.2.20.0' # bsnAPMacAddrTrapVariable
 OID_BSNAPNAME = '.1.3.6.1.4.1.14179.2.2.1.1.3' # bsnAPName
+OID_BSNMAC = '.1.3.6.1.4.1.14179.2.2.1.1.1' # bsnAPDot3MacAddress
+OID_BSNAPIF = '.1.3.6.1.4.1.14179.2.2.2.1.1' # bsnAPIfSlotId
+OID_BSNCHANNEL = '.1.3.6.1.4.1.14179.2.2.2.1.4' # bsnAPIfPhyChannelNumber
 
 """
 Post a message to Slack
@@ -81,7 +84,7 @@ def apremove(data):
     try:
         uptime = data[OID_SYSUPTIME]
         macoid = False
-        mac = data[OID_BSNMAC].strip()
+        mac = data[OID_BSNMACTRAP].strip()
         macoid = False
         for k in data:
             if k.startswith(OID_BSNAPNAME + '.'):
@@ -96,6 +99,44 @@ def apremove(data):
     detail = "  AP: {}\n".format(apname)
     detail = detail + "  MAC address: {}\n".format(mac)
     post_slack("*AP disassociated* at Uptime @ {}\n{}".format(uptime, detail))
+
+    return True
+
+"""
+DFS state changed
+"""
+def dfs_change(data, detected):
+    try:
+        uptime = data[OID_SYSUPTIME]
+        macoid = False
+        for k in data:
+            if k.startswith(OID_BSNMAC + '.'):
+                macoid = k[len(OID_BSNMAC) + 1:]
+                break
+        if not macoid:
+            ## MAC address not found
+            return False
+        apname = data[OID_BSNAPNAME + '.' + macoid]
+        mac = data[OID_BSNMAC + '.' + macoid]
+        slotoid = False
+        for k in data:
+            if k.startswith(OID_BSNAPIF + '.' + macoid + '.'):
+                slotoid = k[len(OID_BSNAPIF) + len(macoid) + 2:]
+                break
+        if not slotoid:
+            ## Slot not found
+            return False
+        slot = data[OID_BSNAPIF + '.' + macoid + '.' + slotoid]
+        nch = data[OID_BSNCHANNEL + '.' + macoid + '.' + slotoid]
+        if detected:
+            dmsg = "Detected"
+        else:
+            dmsg = "Cleared"
+    except:
+        return False
+    detail = "  AP: {} (slot {})\n".format(apname, slot)
+    detail = detail + "  Channel: {}\n".format(nch)
+    post_slack("*DFS Radar {}* at Uptime @ {}\n{}".format(dmsg, uptime, detail))
 
     return True
 
@@ -139,6 +180,10 @@ def main():
         apjoin(data)
     elif data[OID_TRAP] == OID_APREMOVE:
         apremove(data)
+    elif data[OID_TRAP] == OID_DFS_DETECTED:
+        dfs_change(data, True)
+    elif data[OID_TRAP] == OID_DFS_CLEARED:
+        dfs_change(data, False)
 
     return True
 
