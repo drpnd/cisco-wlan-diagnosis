@@ -28,7 +28,8 @@ OID_APNAME = '.1.3.6.1.4.1.9.9.513.1.1.1.1.5' # cLApEntry
 OID_APREMOVE = '.1.3.6.1.4.1.14179.2.6.3.8' # bsnAPDisassociated
 OID_DFS_DETECTED = '.1.3.6.1.4.1.14179.2.6.3.81' # bsnRadarChannelDetected
 OID_DFS_CLEARED = '.1.3.6.1.4.1.14179.2.6.3.82' # bsnRadarChannelCleared
-
+OID_BSNMAC = '.1.3.6.1.4.1.14179.2.6.2.20.0' # bsnAPMacAddrTrapVariable
+OID_BSNAPNAME = '.1.3.6.1.4.1.14179.2.2.1.1.3' # bsnAPName
 
 """
 Post a message to Slack
@@ -77,7 +78,26 @@ def apjoin(data):
 AP removed
 """
 def apremove(data):
-    pass
+    try:
+        uptime = data[OID_SYSUPTIME]
+        macoid = False
+        mac = data[OID_BSNMAC].strip()
+        macoid = False
+        for k in data:
+            if k.startswith(OID_BSNAPNAME + '.'):
+                macoid = k[len(OID_BSNAPNAME) + 1:]
+                break
+        if not macoid:
+            ## AP name not found
+            return False
+        apname = data[OID_BSNAPNAME + '.' + macoid]
+    except:
+        return False
+    detail = "  AP: {}\n".format(apname)
+    detail = detail + "  MAC address: {}\n".format(mac)
+    post_slack("*AP disassociated* at Uptime @ {}\n{}".format(uptime, detail))
+
+    return True
 
 """
 Main routine
