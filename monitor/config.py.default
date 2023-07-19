@@ -3,3 +3,4 @@ MYSQL_USER = 'example'
 MYSQL_PASSWD= 'mypassword'
 MYSQL_DATABASE = 'mydatabase'
 
+SLACK_WEBHOOK = ""
