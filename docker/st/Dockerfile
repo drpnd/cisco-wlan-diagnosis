@@ -10,6 +10,9 @@ RUN pip install cisco-gnmi
 COPY mydb.py /usr/local/
 COPY run.py /usr/local/
 COPY config.py /usr/local/
+COPY client.crt /usr/local/
+COPY client.key /usr/local/
+COPY rootCA.pem /usr/local/
 
 WORKDIR /usr/local/
 
