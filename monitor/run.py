@@ -47,7 +47,7 @@ args = parser.parse_args()
 target = '%s:%d' % (args.host, args.port)
 
 ## Interval (in seconds)
-interval = 60
+interval = 60 * 2
 
 ## Initialize the GNMI client
 client = cisco_gnmi.ClientBuilder(target).set_os('IOS XE').set_secure_from_file(
