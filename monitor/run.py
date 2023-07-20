@@ -27,7 +27,6 @@ import json
 import os
 import errno
 import argparse
-import secrets
 import time
 import mydb
 import config
