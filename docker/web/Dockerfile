@@ -13,6 +13,6 @@ RUN a2enmod ssl
 RUN a2enmod auth_digest
 RUN a2enmod remoteip
 
-COPY ../../web /var/www/html
+COPY ./html /var/www/html
 
 CMD /usr/sbin/apache2ctl -D FOREGROUND
