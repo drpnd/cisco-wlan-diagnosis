@@ -98,10 +98,16 @@ def client_traffic_stats(db, c, ts, hwts, jm):
 Cisco-IOS-XE-wireless-client-oper:client-oper-data/sisf-db-mac
 """
 def client_sisf_db_mac(db, c, ts, hwts, jm):
-    ipv4 = jm['ipv4-binding']['ip-key']['ip-addr']
+    try:
+        ipv4 = jm['ipv4-binding']['ip-key']['ip-addr']
+    except:
+        ipv4 = ''
     ipv6 = ''
-    for e in jm['ipv6-binding']:
-        ipv6 += e['ip-key']['ip-addr'] + "\n"
+    try:
+        for e in jm['ipv6-binding']:
+            ipv6 += e['ip-key']['ip-addr'] + "\n"
+    except:
+        pass
     sql = '''insert into client_sisf_db_mac (ts, hwts, mac_addr, ipv4_binding, ipv6_binding) values (%s, %s, %s, %s, %s)'''
     vals = (ts, hwts, jm['mac-addr'], ipv4, ipv6)
     c.execute(sql, vals)
