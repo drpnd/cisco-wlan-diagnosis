@@ -115,7 +115,7 @@ def client_sisf_db_mac(db, c, ts, hwts, jm):
     c.execute(sql, vals)
 
     ## IPv4
-    sql = '''insert into ipbinding (ts, ip_addr, mac_addr) values(%s, %s, %S)'''
+    sql = '''insert into ipbinding (ts, ip_addr, mac_addr) values(%s, %s, %s)'''
     if ipv4 and ipv4 != '':
         vals = (ts, ipv4, jm['mac-addr'])
         c.execute(sql, vals)
