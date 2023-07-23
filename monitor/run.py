@@ -102,15 +102,26 @@ def client_sisf_db_mac(db, c, ts, hwts, jm):
         ipv4 = jm['ipv4-binding']['ip-key']['ip-addr']
     except:
         ipv4 = ''
-    ipv6 = ''
+    ipv6list = []
     try:
         for e in jm['ipv6-binding']:
-            ipv6 += e['ip-key']['ip-addr'] + "\n"
+            if e['ip-key']['ip-addr']:
+                ipv6list.append(e['ip-key']['ip-addr'])
     except:
         pass
+    ipv6 = "\n".join(ipv6list)
     sql = '''insert into client_sisf_db_mac (ts, hwts, mac_addr, ipv4_binding, ipv6_binding) values (%s, %s, %s, %s, %s)'''
     vals = (ts, hwts, jm['mac-addr'], ipv4, ipv6)
     c.execute(sql, vals)
+
+    ## IPv4
+    sql = '''insert into ipbinding (ts, ip_addr, mac_addr) values(%s, %s, %S)'''
+    if ipv4 and ipv4 != '':
+        vals = (ts, ipv4, jm['mac-addr'])
+        c.execute(sql, vals)
+    for ipv6 in ipv6list:
+        vals = (ts, ipv6, jm['mac-addr'])
+        c.execute(sql, vals)
     return
 
 """
