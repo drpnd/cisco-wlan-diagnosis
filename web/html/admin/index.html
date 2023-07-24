@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Your Statistics</title>
+<meta name="Author" content="Hirochika Asai." />
+<meta name="copyright" content="(c) 2023 Hirochika Asai.  All rights reserved." />
+<style>
+body {
+  font: 10px sans-serif;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.axis .tick line {
+  stroke: rgba(0, 0, 0, 0.1);
+}
+.x.axis path {
+  display: none;
+}
+
+.line {
+  fill: none;
+  stroke: steelblue;
+  stroke-width: 1.5px;
+}
+
+circle,
+path {
+  cursor: pointer;
+}
+
+circle {
+  fill: none;
+  pointer-events: all;
+}
+
+  #tooltip { background-color: white;
+  padding: 3px 5px;
+  border: 1px solid black;
+  text-align: center;}
+
+</style>
+</style>
+<script src="./d3.v3.js"></script>
+<script>
+ var margin = {top: 20, right: 180, bottom: 30, left: 50};
+ var width = 650 - margin.left - margin.right;
+ var height = 200 - margin.top - margin.bottom;
+ var parseTime = d3.time.format("%Y%m%d%H%M%S").parse;
+
+function draw_rssi(selector, csvdata) {
+         var x = d3.time.scale()
+                   .range([0, width]);
+
+         var y = d3.scale.linear()
+                   .range([height, 0]);
+
+         var color = d3.scale.category10();
+
+         var xAxis = d3.svg.axis()
+                       .scale(x)
+                       .orient("bottom");
+
+         var yAxis = d3.svg.axis()
+                       .scale(y)
+                       .orient("left")
+                       .innerTickSize(-width).outerTickSize(0).tickPadding(10);
+
+         var line = d3.svg.line()
+                      .x(function(d) { return x(d.time); })
+                      .y(function(d) { return y(d.assocs); });
+
+         var svg = d3.select(selector).append("svg")
+                     .attr("width", width + margin.left + margin.right)
+                     .attr("height", height + margin.top + margin.bottom)
+                     .append("g")
+                     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+         d3.csv(csvdata, function(error, data) {
+                color.domain(d3.keys(data[0]).filter(function(key) { return key !== "time"; }));
+                data.forEach(function(d) {
+                    d.time = parseTime(d.time);
+                });
+
+                var assocs = color.domain().map(function(name) {
+                     return {
+                         name: name,
+                         values: data.map(function(d) {
+                         return {time: d.time, assocs: +d[name]};
+                         })
+                     };
+                });
+
+                x.domain(d3.extent(data, function(d) { return d.time; }));
+                y.domain([
+                          0,
+                          d3.max(assocs, function(c) { return d3.max(c.values, function(v) { return v.assocs; }); })
+                ]);
+
+  svg.append("g")
+      .attr("class", "x axis")
+      .attr("transform", "translate(0," + height + ")")
+      .call(xAxis);
+
+  svg.append("g")
+      .attr("class", "y axis")
+      .call(yAxis)
+    .append("text")
+     .attr("transform", "rotate(-90)")
+      .attr("x", -30)
+      .attr("y", -46)
+      .attr("dy", ".71em")
+      .style("text-anchor", "end")
+      .text("# of stations");
+
+                 var assoc = svg.selectAll(".assoc")
+                                                                         .data(assocs)
+                                                                         .enter().append("g")
+                                                                         .attr("class", "assoc");
+
+                 assoc.append("path")
+                                 .attr("class", "line")
+                                 .attr("d", function(d) { return line(d.values); })
+                                 .style("stroke", function(d) { return color(d.name); });
+
+                 var legend = svg.selectAll(".legend")
+                                                                                 .data(color.domain().slice())
+                                                                                 .enter().append("g")
+                                                                                 .attr("class", "legend")
+                                                                                 .attr("transform", function(d, i) { return "translate(120," + ( i * 18 ) + ")"; });
+
+                 legend.append("rect")
+                                         .attr("x", width - 18)
+                                         .attr("y", 8)
+                                         .attr("width", 18)
+                                         .attr("height", 2)
+                                         .style("fill", color);
+
+                 legend.append("text")
+                                         .attr("x", width - 24)
+                                         .attr("y", 9)
+                                         .attr("dy", ".35em")
+                                         .style("text-anchor", "end")
+                                         .text(function(d) { return d; });
+         });
+
+
+}
+function draw_stats(selector, csvdata) {
+         var x = d3.time.scale()
+                                                 .range([0, width]);
+
+         var y = d3.scale.linear()
+                                                 .range([height, 0]);
+
+         var color = d3.scale.category10();
+
+         var xAxis = d3.svg.axis()
+                                                                 .scale(x)
+                                                                 .orient("bottom");
+
+         var yAxis = d3.svg.axis()
+                                                                 .scale(y)
+                                                                 .orient("left")
+                                                                 .innerTickSize(-width).outerTickSize(0).tickPadding(10);
+
+         var linerx = d3.svg.line()
+                                                                        .interpolate("basis")
+                                                                        .x(function(d) { return x(d.time); })
+                                                                        .y(function(d) { return y(d.rx); });
+         var linetx = d3.svg.line()
+                                                                        .interpolate("basis")
+                                                                        .x(function(d) { return x(d.time); })
+                                                                        .y(function(d) { return y(d.tx); });
+
+         var svg = d3.select(selector).append("svg")
+                                                         .attr("width", width + margin.left + margin.right)
+                                                         .attr("height", height + margin.top + margin.bottom)
+                                                         .append("g")
+                                                         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+         d3.csv(csvdata, function(error, data) {
+                 color.domain(d3.keys(data[0]).filter(function(key) { return key !== "time"; }));
+                 data.forEach(function(d) {
+                         d.time = parseTime(d.time);
+                 });
+
+                 var bps = color.domain().map(function(name) {
+                         return {
+                                 name: name,
+                                 values: data.map(function(d) {
+                                         var tmp = d[name].split(" ");
+                                         return { time: d.time, rx: -tmp[0], tx: +tmp[1] };
+                                 })
+                         };
+                 });
+
+                 x.domain(d3.extent(data, function(d) { return d.time; }));
+
+                 y.domain([
+                         d3.min(bps, function(c) { return d3.min(c.values, function(v) { return v.rx; }); }),
+                         d3.max(bps, function(c) { return d3.max(c.values, function(v) { return v.tx; }); })
+                 ]);
+
+                 svg.append("g")
+                                .attr("class", "x axis")
+                                .attr("transform", "translate(0," + height + ")")
+                                .call(xAxis);
+
+                 svg.append("g")
+                                .attr("class", "y axis")
+                                .call(yAxis)
+                                .append("text")
+                                .attr("transform", "rotate(-90)")
+                                .attr("x", -30)
+                                .attr("y", -46)
+                                .attr("dy", ".71em")
+                                .style("text-anchor", "end")
+                                .text("Traffic [Mbps]");
+
+                 svg.append("text")
+                                .attr("x", width - 5)
+                                .attr("y", 10)
+                                .style("text-anchor", "end")
+                                .text("To STA");
+                 svg.append("text")
+                                .attr("x", width - 5)
+                                .attr("y", height)
+                                .style("text-anchor", "end")
+                                .text("To AP");
+
+
+                 var traffic = svg.selectAll(".bps")
+                                                                                        .data(bps)
+                                                                                        .enter().append("g")
+                                                                                        .attr("class", "traffic");
+
+                 traffic.append("path")
+                                                .attr("class", "line")
+                                                .attr("d", function(d) { return linerx(d.values); })
+                                                .style("stroke", function(d) { return color(d.name); });
+
+                 traffic.append("path")
+                                                .attr("class", "line")
+                                                .attr("d", function(d) { return linetx(d.values); })
+                                                .style("stroke", function(d) { return color(d.name); });
+
+                 var legend = svg.selectAll(".legend")
+                                                                                 .data(color.domain().slice())
+                                                                                 .enter().append("g")
+                                                                                 .attr("class", "legend")
+                                                                                 .attr("transform", function(d, i) { return "translate(120," + i * 18 + ")"; });
+                 legend.append("rect")
+                                         .attr("x", width - 18)
+                                         .attr("y", 8)
+                                         .attr("width", 18)
+                                         .attr("height", 2)
+                                         .style("fill", color);
+
+                 legend.append("text")
+                                         .attr("x", width - 24)
+                                         .attr("y", 9)
+                                         .attr("dy", ".35em")
+                                         .style("text-anchor", "end")
+                                         .text(function(d) { return d; });
+
+         });
+}
+
+window.onload = function(e) {
+    //draw_assocs("#assocs_per_ssid", "./stats.cgi?mode=sta_per_ssid");
+};
+
+
+</script>
+
+<body>
+<h1>Your Statistics</h1>
+
+<h2>RSSI History</h2>
+<div id="assocs_per_ssid"></div>
+
+<h2>Traffic chart</h2>
+
+<h2>AP</h2>
+
+</body>
+</html>
+
