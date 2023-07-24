@@ -55,10 +55,19 @@ def main():
         default(args)
     elif f == 'ap_history':
         ts = int(time.time())
-        api.client.ap_history(ts - 3600, ts)
+        mac_addr = api.client.resolve_macaddr(db, c)
+        if not mac_addr:
+            return False
+        api.client.ap_history(mac_addr, ts - 3600, ts)
     elif f == 'ap_history_detail':
         ts = int(time.time())
         api.client.ap_history_detail(ts - 3600, ts)
+    elif f == 'stats':
+        ts = int(time.time())
+        mac_addr = api.client.resolve_macaddr(db, c)
+        if not mac_addr:
+            return False
+        api.client.statistics(mac_addr, ts - 3600, ts)
     elif f == 'token':
         api.client.token(args)
     else:
