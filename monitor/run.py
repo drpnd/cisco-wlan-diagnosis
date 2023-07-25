@@ -154,7 +154,7 @@ def ap_radio_oper_data(db, c, ts, hwts, jm):
     try:
         for d in jm['vap-oper-config']:
             sql = '''insert into ap_radio_oper_data_vap_oper_config (ts, wtp_mac, radio_slot_id, ap_vap_id, wlan_id, bssid_mac, wlan_profile_name, ssid) values(%s, %s, %s, %s, %s, %s, %s, %s)'''
-            vals = (ts, jm['wtp-mac'], jm['radio-slot-id'], d['ap-vap-id'], d['wlan-id'], d['bssid-mac'], d['wtp-mac'], d['wlan-profile-name'], d['ssid'])
+            vals = (ts, jm['wtp-mac'], jm['radio-slot-id'], d['ap-vap-id'], d['wlan-id'], d['bssid-mac'], d['wlan-profile-name'], d['ssid'])
             c.execute(sql, vals)
     except:
         print('ap_radio_oper_data/vap', sql, jm)
