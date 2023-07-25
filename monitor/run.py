@@ -158,10 +158,13 @@ def ap_radio_oper_data(db, c, ts, hwts, jm):
             c.execute(sql, vals)
     except:
         print('ap_radio_oper_data/vap', sql, jm)
-    for d in jm['radio-band-info']:
-        sql = '''insert into ap_radio_oper_data_radio_band_info (ts, wtp_mac, radio_slot_id, band_id, phy_tx_power_config_type, current_tx_power_level, num_supp_power_levels, curr_tx_power_in_dbm, diversity_selection, antenna_mode, num_of_antennas) values(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'''
-        vals = (ts, jm['wtp-mac'], jm['radio-slot-id'], d['band-id'], d['phy-tx-pwr-cfg']['cfg-data']['phy-tx-power-config-type'], d['phy-tx-pwr-cfg']['cfg-data']['current-tx-power-level'], d['phy-tx-pwr-lvl-cfg']['cfg-data']['num-supp-power-levels'], d['phy-tx-pwr-lvl-cfg']['cfg-data']['curr-tx-power-in-dbm'], d['antenna-cfg']['cfg-data']['diversity-selection'], d['antenna-cfg']['cfg-data']['antenna-mode'], d['antenna-cfg']['cfg-data']['num-of-antennas'])
-        c.execute(sql, vals)
+    try:
+        for d in jm['radio-band-info']:
+            sql = '''insert into ap_radio_oper_data_radio_band_info (ts, wtp_mac, radio_slot_id, band_id, phy_tx_power_config_type, current_tx_power_level, num_supp_power_levels, curr_tx_power_in_dbm, diversity_selection, antenna_mode, num_of_antennas) values(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'''
+            vals = (ts, jm['wtp-mac'], jm['radio-slot-id'], d['band-id'], d['phy-tx-pwr-cfg']['cfg-data']['phy-tx-power-config-type'], d['phy-tx-pwr-cfg']['cfg-data']['current-tx-power-level'], d['phy-tx-pwr-lvl-cfg']['cfg-data']['num-supp-power-levels'], d['phy-tx-pwr-lvl-cfg']['cfg-data']['curr-tx-power-in-dbm'], d['antenna-cfg']['cfg-data']['diversity-selection'], d['antenna-cfg']['cfg-data']['antenna-mode'], d['antenna-cfg']['cfg-data']['num-of-antennas'])
+            c.execute(sql, vals)
+    except:
+        print('ap_radio_oper_data/radio-band-info', sql, jm)
     return
 
 """
@@ -174,6 +177,7 @@ def rrm_measurement(db, c, ts, hwts, jm):
         c.execute(sql, vals)
     except:
         print('rrm_measurement', sql, jm)
+        raise
     return
 
 """
