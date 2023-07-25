@@ -40,119 +40,121 @@ circle {
   pointer-events: all;
 }
 
-  #tooltip { background-color: white;
+#tooltip { background-color: white;
   padding: 3px 5px;
   border: 1px solid black;
-  text-align: center;}
-
-</style>
-</style>
-<script src="./d3.v3.js"></script>
-<script>
- var margin = {top: 20, right: 180, bottom: 30, left: 50};
- var width = 650 - margin.left - margin.right;
- var height = 200 - margin.top - margin.bottom;
- var parseTime = d3.time.format("%Y%m%d%H%M%S").parse;
-
-function draw_rssi(selector, csvdata) {
-         var x = d3.time.scale()
-                   .range([0, width]);
-
-         var y = d3.scale.linear()
-                   .range([height, 0]);
-
-         var color = d3.scale.category10();
-
-         var xAxis = d3.svg.axis()
-                       .scale(x)
-                       .orient("bottom");
-
-         var yAxis = d3.svg.axis()
-                       .scale(y)
-                       .orient("left")
-                       .innerTickSize(-width).outerTickSize(0).tickPadding(10);
-
-         var line = d3.svg.line()
-                      .x(function(d) { return x(d.time); })
-                      .y(function(d) { return y(d.assocs); });
-
-         var svg = d3.select(selector).append("svg")
-                     .attr("width", width + margin.left + margin.right)
-                     .attr("height", height + margin.top + margin.bottom)
-                     .append("g")
-                     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-         d3.csv(csvdata, function(error, data) {
-                color.domain(d3.keys(data[0]).filter(function(key) { return key !== "time"; }));
-                data.forEach(function(d) {
-                    d.time = parseTime(d.time);
-                });
-
-                var assocs = color.domain().map(function(name) {
-                     return {
-                         name: name,
-                         values: data.map(function(d) {
-                         return {time: d.time, assocs: +d[name]};
-                         })
-                     };
-                });
-
-                x.domain(d3.extent(data, function(d) { return d.time; }));
-                y.domain([
-                          0,
-                          d3.max(assocs, function(c) { return d3.max(c.values, function(v) { return v.assocs; }); })
-                ]);
-
-  svg.append("g")
-      .attr("class", "x axis")
-      .attr("transform", "translate(0," + height + ")")
-      .call(xAxis);
-
-  svg.append("g")
-      .attr("class", "y axis")
-      .call(yAxis)
-    .append("text")
-     .attr("transform", "rotate(-90)")
-      .attr("x", -30)
-      .attr("y", -46)
-      .attr("dy", ".71em")
-      .style("text-anchor", "end")
-      .text("# of stations");
-
-                 var assoc = svg.selectAll(".assoc")
-                                                                         .data(assocs)
-                                                                         .enter().append("g")
-                                                                         .attr("class", "assoc");
-
-                 assoc.append("path")
-                                 .attr("class", "line")
-                                 .attr("d", function(d) { return line(d.values); })
-                                 .style("stroke", function(d) { return color(d.name); });
-
-                 var legend = svg.selectAll(".legend")
-                                                                                 .data(color.domain().slice())
-                                                                                 .enter().append("g")
-                                                                                 .attr("class", "legend")
-                                                                                 .attr("transform", function(d, i) { return "translate(120," + ( i * 18 ) + ")"; });
-
-                 legend.append("rect")
-                                         .attr("x", width - 18)
-                                         .attr("y", 8)
-                                         .attr("width", 18)
-                                         .attr("height", 2)
-                                         .style("fill", color);
-
-                 legend.append("text")
-                                         .attr("x", width - 24)
-                                         .attr("y", 9)
-                                         .attr("dy", ".35em")
-                                         .style("text-anchor", "end")
-                                         .text(function(d) { return d; });
-         });
-
-
+  text-align: center;
 }
-function draw_stats(selector, csvdata) {
+
+</style>
+</style>
+<script src="./d3.v7.js"></script>
+<script>
+var margin = {top: 20, right: 180, bottom: 30, left: 50};
+var width = 650 - margin.left - margin.right;
+var height = 200 - margin.top - margin.bottom;
+var parseTime = d3.timeParse("%s");
+
+function draw_timeseries(selector, jsondata) {
+    var x = d3.scaleTime()
+              .range([0, width]);
+
+    var y = d3.scaleLinear()
+              .range([height, 0]);
+
+    var color = d3.scaleOrdinal(d3.schemeCategory10);
+
+    var xAxis = d3.axisBottom(x);
+
+    var yAxis = d3.axisLeft(y)
+                  .tickSizeInner(-width)
+                  .tickSizeOuter(0)
+                  .tickPadding(10);
+
+    var line = d3.line()
+                 .x(function(d) { return x(d.time); })
+                 .y(function(d) { return y(d.value); });
+
+    var svg = d3.select(selector).append("svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+                .append("g")
+                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    d3.json(jsondata).then(function (data) {
+      timeseries = new Array();
+      data.forEach(function (d) {
+        if ( d.data ) {
+          dic = {time: parseTime(d.ts), rssi: d.most_recent_rssi}
+          timeseries.push(dic);
+        }
+      });
+      color.domain(new Array('rssi'));
+      var timeseries_data = color.domain().map(function(name) {
+        return {
+          name: name,
+          values: timeseries.map(function(d) {
+            return {time: d.time, value: d[name]};
+          })
+        };
+      });
+
+      x.domain(d3.extent(timeseries, function(d) { return d.time; }));
+      y.domain([
+                d3.min(timeseries_data, function(c) { return d3.min(c.values, function(v) { return v.value; }); }),
+                d3.max(timeseries_data, function(c) { return d3.max(c.values, function(v) { return v.value; }); })
+      ]);
+
+      svg.append("g")
+        .attr("class", "x axis")
+        .attr("transform", "translate(0," + height + ")")
+        .call(xAxis);
+
+      svg.append("g")
+        .attr("class", "y axis")
+        .call(yAxis)
+        .append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("x", -30)
+        .attr("y", -46)
+        .attr("dy", ".71em")
+        .style("text-anchor", "end")
+        .text("RSSI");
+
+      var tspath = svg.selectAll(".timeseries")
+                      .data(timeseries_data)
+                      .enter().append("g")
+                      .attr("class", "timeseries");
+
+      tspath.append("path")
+            .attr("class", "line")
+            .attr("d", function(d) { return line(d.values); })
+            .style("stroke", function(d) { return color(d.name); });
+
+      var legend = svg.selectAll(".legend")
+                      .data(color.domain().slice())
+                      .enter().append("g")
+                      .attr("class", "legend")
+                      .attr("transform", function(d, i) { return "translate(120," + ( i * 18 ) + ")"; });
+
+      legend.append("rect")
+            .attr("x", width - 18)
+            .attr("y", 8)
+            .attr("width", 18)
+            .attr("height", 2)
+            .style("fill", color);
+
+      legend.append("text")
+            .attr("x", width - 24)
+            .attr("y", 9)
+            .attr("dy", ".35em")
+            .style("text-anchor", "end")
+            .text(function(d) { return d; });
+
+      //console.log(timeseries);
+    }).catch(function (error){console.log("error")});
+}
+function draw_stats(selector, jsondata) {
          var x = d3.time.scale()
                                                  .range([0, width]);
 
@@ -274,9 +276,9 @@ function draw_stats(selector, csvdata) {
 }
 
 window.onload = function(e) {
-    //draw_assocs("#assocs_per_ssid", "./stats.cgi?mode=sta_per_ssid");
+    //draw_timeseries("#rssi", "./tmp.json");
+    draw_timeseries("#rssi", "../admin/api.cgi?f=stats");
 };
-
 
 </script>
 
@@ -284,7 +286,7 @@ window.onload = function(e) {
 <h1>Your Statistics</h1>
 
 <h2>RSSI History</h2>
-<div id="assocs_per_ssid"></div>
+<div id="rssi"></div>
 
 <h2>Traffic chart</h2>
 
