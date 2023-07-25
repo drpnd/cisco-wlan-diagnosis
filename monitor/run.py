@@ -71,7 +71,7 @@ def client_common_oper_data(db, c, ts, hwts, jm):
         vals = (ts, hwts, jm['client-mac'], jm['ap-name'], jm['ms-ap-slot-id'], jm['ms-radio-type'], jm['wlan-id'], jm['client-type'], jm['co-state'], username)
         c.execute(sql, vals)
     except:
-        print('client_oper_data', sql, vals)
+        print('client_oper_data', sql, jm)
     return
 
 """
@@ -95,7 +95,7 @@ def client_dot11_oper_data(db, c, ts, hwts, jm):
         vals = (ts, hwts, jm['ms-mac-address'], jm['ms-bssid'], jm['ap-mac-address'], jm['current-channel'], jm['ms-wlan-id'], jm['vap-ssid'], jm['policy-profile'], jm['ms-ap-slot-id'], jm['radio-type'], jm['ms-assoc-time'], v1, jm['ewlc-ms-phy-type'], jm['encryption-type'], v2)
         c.execute(sql, vals)
     except:
-        print('client_dot11_oper_data', sql, vals)
+        print('client_dot11_oper_data', sql, jm)
     return
 
 """
@@ -107,7 +107,7 @@ def client_traffic_stats(db, c, ts, hwts, jm):
         vals = (ts, hwts, jm['ms-mac-address'], jm['bytes-rx'], jm['bytes-tx'], jm['pkts-rx'], jm['pkts-tx'], jm['data-retries'], jm['mic-mismatch'], jm['mic-missing'], jm['most-recent-rssi'], jm['most-recent-snr'], jm['tx-retries'], jm['speed'], jm['spatial-stream'])
         c.execute(sql, vals)
     except:
-        print('client_traffic_stats', sql, vals)
+        print('client_traffic_stats', sql, jm)
     return
 
 """
