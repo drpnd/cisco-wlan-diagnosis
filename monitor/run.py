@@ -144,6 +144,20 @@ def client_sisf_db_mac(db, c, ts, hwts, jm):
 Cisco-IOS-XE-wireless-access-point-oper:access-point-oper-data/radio-oper-data
 """
 def ap_radio_oper_data(db, c, ts, hwts, jm):
+    vht = False
+    if jm['phy-ht-cfg']['cfg-data']['vht-enable'] == 'true':
+        vht = True
+    sql = '''insert into ap_radio_oper_data (ts, wtp_mac, radio_slot_id, slot_id, radio_type, admin_state, oper_state, radio_mode, radio_sub_mode, radio_subtype, radio_subband, ht_enable, phy_ht_cfg_config_type, curr_freq, chan_width, ext_chan, vht_enable, rrm_channel_change_reason) values(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'''
+    vals = (ts, jm['wtp-mac'], jm['radio-slot-id'], jm['slot-id'], jm['radio-type'], jm['admin-state'], jm['oper-state'], jm['radio-mode'], jm['radio-sub-mode'], jm['radio-subtype'], jm['radio-subband'], jm['phy-ht-cfg']['cfg-data']['ht-enable'], jm['phy-ht-cfg']['cfg-data']['phy-ht-cfg-config-type'], jm['phy-ht-cfg']['cfg-data']['curr-freq'], jm['phy-ht-cfg']['cfg-data']['chan-width'], jm['phy-ht-cfg']['cfg-data']['ext-chan'], vht, jm['phy-ht-cfg']['cfg-data']['rrm-channel-change-reason'])
+    c.execute(sql, vals)
+    for d in jm['vap-oper-config']:
+        sql = '''insert into ap_radio_oper_data_vap_oper_config (ts, wtp_mac, radio_slot_id, ap_vap_id, wlan_id, bssid_mac, wlan_profile_name, ssid) values(%s, %s, %s, %s, %s, %s, %s, %s)'''
+        vals = (ts, jm['wtp-mac'], jm['radio-slot-id'], d['ap-vap-id'], d['wlan-id'], d['bssid-mac'], d['wtp-mac'], d['wlan-profile-name'], d['ssid'])
+        c.execute(sql, vals)
+    for d in jm['radio-band-info']:
+        sql = '''insert into ap_radio_oper_data_radio_band_info (ts, wtp_mac, radio_slot_id, band_id, phy_tx_power_config_type, current_tx_power_level, num_supp_power_levels, curr_tx_power_in_dbm, diversity_selection, antenna_mode, num_of_antennas) values(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'''
+        vals = (ts, jm['wtp-mac'], jm['radio-slot-id'], d['band-id'], d['phy-tx-pwr-cfg']['cfg-data']['phy-tx-power-config-type'], d['phy-tx-pwr-cfg']['cfg-data']['current-tx-power-level'], d['phy-tx-pwr-lvl-cfg']['cfg-data']['num-supp-power-levels'], d['phy-tx-pwr-lvl-cfg']['cfg-data']['curr-tx-power-in-dbm'], d['antenna-cfg']['cfg-data']['diversity-selection'], d['antenna-cfg']['cfg-data']['antenna-mode'], d['antenna-cfg']['cfg-data']['num-of-antennas'])
+        c.execute(sql, vals)
     return
 
 """
