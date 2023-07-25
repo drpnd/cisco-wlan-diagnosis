@@ -60,10 +60,10 @@ def main():
         mac_addr = api.client.resolve_macaddr(db, c)
         if not mac_addr:
             return False
-        api.client.ap_history(mac_addr, ts - 3600, ts)
+        api.client.ap_history(mac_addr, ts - 7200, ts)
     elif f == 'ap_history_detail':
         ts = int(time.time())
-        api.client.ap_history_detail(ts - 3600, ts)
+        api.client.ap_history_detail(ts - 7200, ts)
     elif f == 'stats':
         db = api.mydb.connect()
         c = db.cursor()
@@ -71,7 +71,7 @@ def main():
         mac_addr = api.client.resolve_macaddr(db, c)
         if not mac_addr:
             return False
-        api.client.statistics(mac_addr, ts - 3600, ts)
+        api.client.statistics(mac_addr, ts - 7200, ts)
     elif f == 'admin_stats':
         db = api.mydb.connect()
         c = db.cursor()
@@ -80,7 +80,7 @@ def main():
             mac_addr = args['mac'].value
         except:
             return False
-        api.client.statistics(mac_addr, ts - 3600, ts)
+        api.client.statistics(mac_addr, ts - 7200, ts)
     elif f == 'token':
         api.client.token(args)
     else:
