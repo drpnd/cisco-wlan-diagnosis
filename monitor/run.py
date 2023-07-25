@@ -141,6 +141,24 @@ def client_sisf_db_mac(db, c, ts, hwts, jm):
     return
 
 """
+Cisco-IOS-XE-wireless-access-point-oper:access-point-oper-data/radio-oper-data
+"""
+def ap_radio_oper_data(db, c, ts, hwts, jm):
+    return
+
+"""
+Cisco-IOS-XE-wireless-rrm-oper:rrm-oper-data/rrm_measurement
+"""
+def rrm_measurement(db, c, ts, hwts, jm):
+    try:
+        sql = '''insert into rrm_measurement (ts, wtp_mac, radio_slot_id, rx_util_percentage, tx_util_percentage, cca_util_percentage, rx_noise_utilization) values(%s, %s, %s, %s, %s, %s, %s)'''
+        vals = (ts, jm['wtp-mac'], jm['radio-slot-id'], jm['rx-util-percentage'], jm['tx-util-percentage'], jm['cca-util-percentage'], jm['rx-noise-utilization'])
+        c.execute(sql, vals)
+    except:
+        print('rrm_measurement', sql, jm)
+    return
+
+"""
 Main routine
 """
 def main():
@@ -148,7 +166,7 @@ def main():
     db = mydb.connect()
     c = db.cursor()
 
-    xpaths = ['Cisco-IOS-XE-wireless-client-oper:client-oper-data/common-oper-data', 'Cisco-IOS-XE-wireless-client-oper:client-oper-data/dot11-oper-data', 'Cisco-IOS-XE-wireless-client-oper:client-oper-data/traffic-stats', 'Cisco-IOS-XE-wireless-client-oper:client-oper-data/sisf-db-mac']
+    xpaths = ['Cisco-IOS-XE-wireless-client-oper:client-oper-data/common-oper-data', 'Cisco-IOS-XE-wireless-client-oper:client-oper-data/dot11-oper-data', 'Cisco-IOS-XE-wireless-client-oper:client-oper-data/traffic-stats', 'Cisco-IOS-XE-wireless-client-oper:client-oper-data/sisf-db-mac', 'Cisco-IOS-XE-wireless-access-point-oper:access-point-oper-data/radio-oper-data', 'Cisco-IOS-XE-wireless-rrm-oper:rrm-oper-data/rrm-measurement']
 
     ## Use get instead of subscribe as subscribe has some issues
     while True:
@@ -168,6 +186,12 @@ def main():
                         client_traffic_stats(db, c, ts, hwts, json.loads(um.val.json_ietf_val))
                     elif um.path.elem[1].name == 'sisf-db-mac':
                         client_sisf_db_mac(db, c, ts, hwts, json.loads(um.val.json_ietf_val))
+                elif um.path.elem[0].name == 'Cisco-IOS-XE-wireless-access-point-oper:access-point-oper-data':
+                    if um.path.elem[1].name == 'radio-oper-data':
+                        ap_radio_oper_data(db, c, ts, hwts, json.loads(um.val.json_ietf_val))
+                elif um.path.elem[0].name == 'Cisco-IOS-XE-wireless-rrm-oper:rrm-oper-data':
+                    if um.path.elem[1].name == 'rrm-measurement':
+                        rrm_measurement(db, c, ts, hwts, json.loads(um.val.json_ietf_val))
                 #print(um)
         ## data point
         sql = '''insert into datapoints (ts) values(%s)'''

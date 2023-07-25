@@ -54,6 +54,8 @@ def main():
     if f == 'default':
         default(args)
     elif f == 'ap_history':
+        db = api.mydb.connect()
+        c = db.cursor()
         ts = int(time.time())
         mac_addr = api.client.resolve_macaddr(db, c)
         if not mac_addr:
@@ -63,6 +65,8 @@ def main():
         ts = int(time.time())
         api.client.ap_history_detail(ts - 3600, ts)
     elif f == 'stats':
+        db = api.mydb.connect()
+        c = db.cursor()
         ts = int(time.time())
         mac_addr = api.client.resolve_macaddr(db, c)
         if not mac_addr:
