@@ -72,6 +72,15 @@ def main():
         if not mac_addr:
             return False
         api.client.statistics(mac_addr, ts - 3600, ts)
+    elif f == 'admin_stats':
+        db = api.mydb.connect()
+        c = db.cursor()
+        ts = int(time.time())
+        try:
+            mac_addr = args['mac'].f
+        except:
+            return False
+        api.client.statistics(mac_addr, ts - 3600, ts)
     elif f == 'token':
         api.client.token(args)
     else:
