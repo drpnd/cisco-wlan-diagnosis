@@ -147,7 +147,7 @@ Cisco-IOS-XE-wireless-access-point-oper:access-point-oper-data/capwap-data
 def ap_capwap_data(db, c, ts, hwts, jm):
     try:
         sql = '''insert into ap_capwap_data (ts, wtp_mac, ip_addr, name, ap_location) values(%s, %s, %s, %s, %s)'''
-        vals = (ts, jm['wtp-mac'], jm['ip-addr'], d['name'], d['ap-location']['location'])
+        vals = (ts, jm['wtp-mac'], jm['ip-addr'], jm['name'], jm['ap-location']['location'])
         c.execute(sql, vals)
     except:
         print('ap_capwap_data', sql, jm)
