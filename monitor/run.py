@@ -225,6 +225,8 @@ def main():
                     elif um.path.elem[0].name == 'Cisco-IOS-XE-wireless-access-point-oper:access-point-oper-data':
                         if um.path.elem[1].name == 'radio-oper-data':
                             ap_radio_oper_data(db, c, ts, hwts, json.loads(um.val.json_ietf_val))
+                        elif um.path.elem[1].name == 'capwap-data':
+                            ap_capwap_data(db, c, ts, hwts, json.loads(um.val.json_ietf_val))
                     elif um.path.elem[0].name == 'Cisco-IOS-XE-wireless-rrm-oper:rrm-oper-data':
                         if um.path.elem[1].name == 'rrm-measurement':
                             rrm_measurement(db, c, ts, hwts, json.loads(um.val.json_ietf_val))
