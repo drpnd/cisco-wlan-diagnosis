@@ -67,8 +67,11 @@ def client_common_oper_data(db, c, ts, hwts, jm):
             username = ''
     except:
         username = ''
-    vals = (ts, hwts, jm['client-mac'], jm['ap-name'], jm['ms-ap-slot-id'], jm['ms-radio-type'], jm['wlan-id'], jm['client-type'], jm['co-state'], username)
-    c.execute(sql, vals)
+    try:
+        vals = (ts, hwts, jm['client-mac'], jm['ap-name'], jm['ms-ap-slot-id'], jm['ms-radio-type'], jm['wlan-id'], jm['client-type'], jm['co-state'], username)
+        c.execute(sql, vals)
+    except:
+        print('client_oper_data', sql, vals)
     return
 
 """
