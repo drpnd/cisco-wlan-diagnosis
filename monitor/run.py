@@ -73,14 +73,18 @@ Cisco-IOS-XE-wireless-client-oper:client-oper-data/dot11-oper-data
 """
 def client_dot11_oper_data(db, c, ts, hwts, jm):
     sql = '''insert into client_dot11_oper_data (ts, hwts, ms_mac_address, ms_bssid, ap_mac_address, current_channel, ms_wlan_id, vap_ssid, policy_profile, ms_ap_slot_id, radio_type, ms_assoc_time, is_11g_client, ewlc_ms_phy_type, encryption_type, dot11_6ghz_cap) values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'''
-    if jm['is-11g-client'] == 'true':
-        v1 = True
-    else:
-        v1 = False
-    if jm['dot11-6ghz-cap'] == 'true':
-        v2 = True
-    else:
-        v2 = False
+    v1 = False
+    try:
+        if jm['is-11g-client'] == 'true':
+            v1 = True
+    except:
+        pass
+    v2 = False
+    try:
+        if jm['dot11-6ghz-cap'] == 'true':
+            v2 = True
+    except:
+        pass
     vals = (ts, hwts, jm['ms-mac-address'], jm['ms-bssid'], jm['ap-mac-address'], jm['current-channel'], jm['ms-wlan-id'], jm['vap-ssid'], jm['policy-profile'], jm['ms-ap-slot-id'], jm['radio-type'], jm['ms-assoc-time'], v1, jm['ewlc-ms-phy-type'], jm['encryption-type'], v2)
     c.execute(sql, vals)
     return
