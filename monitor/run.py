@@ -177,6 +177,7 @@ def rrm_measurement(db, c, ts, hwts, jm):
         c.execute(sql, vals)
     except:
         print('rrm_measurement', sql, jm)
+        raise
     return
 
 """
