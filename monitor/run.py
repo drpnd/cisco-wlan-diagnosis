@@ -60,9 +60,12 @@ Cisco-IOS-XE-wireless-client-oper:client-oper-data/common-oper-data
 """
 def client_common_oper_data(db, c, ts, hwts, jm):
     sql = '''insert into client_oper_data (ts, hwts, client_mac, ap_name, ms_ap_slot_id, ms_radio_type, wlan_id, client_type, co_state, username) values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'''
-    if isinstance(jm['username'], str):
-        username = jm['username']
-    else:
+    try:
+        if isinstance(jm['username'], str):
+            username = jm['username']
+        else:
+            username = ''
+    except:
         username = ''
     vals = (ts, hwts, jm['client-mac'], jm['ap-name'], jm['ms-ap-slot-id'], jm['ms-radio-type'], jm['wlan-id'], jm['client-type'], jm['co-state'], username)
     c.execute(sql, vals)
