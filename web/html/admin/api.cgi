@@ -77,7 +77,7 @@ def main():
         c = db.cursor()
         ts = int(time.time())
         try:
-            mac_addr = args['mac'].f
+            mac_addr = args['mac'].value
         except:
             return False
         api.client.statistics(mac_addr, ts - 3600, ts)
