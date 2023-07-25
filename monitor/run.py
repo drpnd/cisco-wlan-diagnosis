@@ -89,9 +89,12 @@ def client_dot11_oper_data(db, c, ts, hwts, jm):
 Cisco-IOS-XE-wireless-client-oper:client-oper-data/traffic-stats
 """
 def client_traffic_stats(db, c, ts, hwts, jm):
-    sql = '''insert into client_traffic_stats (ts, hwts, ms_mac_address, bytes_rx, bytes_tx, pkts_rx, pkts_tx, data_retries, mic_mismatch, mic_missing, most_recent_rssi, most_recent_snr, tx_retries, speed, spatial_stream) values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'''
-    vals = (ts, hwts, jm['ms-mac-address'], jm['bytes-rx'], jm['bytes-tx'], jm['pkts-rx'], jm['pkts-tx'], jm['data-retries'], jm['mic-mismatch'], jm['mic-missing'], jm['most-recent-rssi'], jm['most-recent-snr'], jm['tx-retries'], jm['speed'], jm['spatial-stream'])
-    c.execute(sql, vals)
+    try:
+        sql = '''insert into client_traffic_stats (ts, hwts, ms_mac_address, bytes_rx, bytes_tx, pkts_rx, pkts_tx, data_retries, mic_mismatch, mic_missing, most_recent_rssi, most_recent_snr, tx_retries, speed, spatial_stream) values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'''
+        vals = (ts, hwts, jm['ms-mac-address'], jm['bytes-rx'], jm['bytes-tx'], jm['pkts-rx'], jm['pkts-tx'], jm['data-retries'], jm['mic-mismatch'], jm['mic-missing'], jm['most-recent-rssi'], jm['most-recent-snr'], jm['tx-retries'], jm['speed'], jm['spatial-stream'])
+        c.execute(sql, vals)
+    except:
+        print('client_traffic_stats', sql, vals)
     return
 
 """
