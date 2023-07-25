@@ -158,7 +158,6 @@ def ap_radio_oper_data(db, c, ts, hwts, jm):
             c.execute(sql, vals)
     except:
         print('ap_radio_oper_data/vap', sql, jm)
-        raise
     try:
         for d in jm['radio-band-info']:
             sql = '''insert into ap_radio_oper_data_radio_band_info (ts, wtp_mac, radio_slot_id, band_id, phy_tx_power_config_type, current_tx_power_level, num_supp_power_levels, curr_tx_power_in_dbm, diversity_selection, antenna_mode, num_of_antennas) values(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'''
