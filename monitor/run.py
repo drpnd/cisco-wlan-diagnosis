@@ -186,28 +186,28 @@ def main():
     ## Use get instead of subscribe as subscribe has some issues
     while True:
         ts = int(time.time())
-        response = client.get_xpaths(xpaths, data_type='STATE', encoding='JSON_IETF')
-        for msg in response.notification:
-            ## Timestamp
-            hwts = msg.timestamp
-            for um in msg.update:
-                ## common-oper-data
-                if um.path.elem[0].name == 'Cisco-IOS-XE-wireless-client-oper:client-oper-data':
-                    if um.path.elem[1].name == 'common-oper-data':
-                        client_common_oper_data(db, c, ts, hwts, json.loads(um.val.json_ietf_val))
-                    elif um.path.elem[1].name == 'dot11-oper-data':
-                        client_dot11_oper_data(db, c, ts, hwts, json.loads(um.val.json_ietf_val))
-                    elif um.path.elem[1].name == 'traffic-stats':
-                        client_traffic_stats(db, c, ts, hwts, json.loads(um.val.json_ietf_val))
-                    elif um.path.elem[1].name == 'sisf-db-mac':
-                        client_sisf_db_mac(db, c, ts, hwts, json.loads(um.val.json_ietf_val))
-                elif um.path.elem[0].name == 'Cisco-IOS-XE-wireless-access-point-oper:access-point-oper-data':
-                    if um.path.elem[1].name == 'radio-oper-data':
-                        ap_radio_oper_data(db, c, ts, hwts, json.loads(um.val.json_ietf_val))
-                elif um.path.elem[0].name == 'Cisco-IOS-XE-wireless-rrm-oper:rrm-oper-data':
-                    if um.path.elem[1].name == 'rrm-measurement':
-                        rrm_measurement(db, c, ts, hwts, json.loads(um.val.json_ietf_val))
-                #print(um)
+        for xpath in xpaths:
+            response = client.get_xpaths([xpath], data_type='STATE', encoding='JSON_IETF')
+            for msg in response.notification:
+                ## Timestamp
+                hwts = msg.timestamp
+                for um in msg.update:
+                    ## common-oper-data
+                    if um.path.elem[0].name == 'Cisco-IOS-XE-wireless-client-oper:client-oper-data':
+                        if um.path.elem[1].name == 'common-oper-data':
+                            client_common_oper_data(db, c, ts, hwts, json.loads(um.val.json_ietf_val))
+                        elif um.path.elem[1].name == 'dot11-oper-data':
+                            client_dot11_oper_data(db, c, ts, hwts, json.loads(um.val.json_ietf_val))
+                        elif um.path.elem[1].name == 'traffic-stats':
+                            client_traffic_stats(db, c, ts, hwts, json.loads(um.val.json_ietf_val))
+                        elif um.path.elem[1].name == 'sisf-db-mac':
+                            client_sisf_db_mac(db, c, ts, hwts, json.loads(um.val.json_ietf_val))
+                    elif um.path.elem[0].name == 'Cisco-IOS-XE-wireless-access-point-oper:access-point-oper-data':
+                        if um.path.elem[1].name == 'radio-oper-data':
+                            ap_radio_oper_data(db, c, ts, hwts, json.loads(um.val.json_ietf_val))
+                    elif um.path.elem[0].name == 'Cisco-IOS-XE-wireless-rrm-oper:rrm-oper-data':
+                        if um.path.elem[1].name == 'rrm-measurement':
+                            rrm_measurement(db, c, ts, hwts, json.loads(um.val.json_ietf_val))
         ## data point
         sql = '''insert into datapoints (ts) values(%s)'''
         c.execute(sql, (ts, ))
