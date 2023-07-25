@@ -142,6 +142,18 @@ def client_sisf_db_mac(db, c, ts, hwts, jm):
     return
 
 """
+Cisco-IOS-XE-wireless-access-point-oper:access-point-oper-data/capwap-data
+"""
+def ap_capwap_data(db, c, ts, hwts, jm):
+    try:
+        sql = '''insert into ap_capwap_data (ts, wtp_mac, ip_addr, name, ap_location) values(%s, %s, %s, %s, %s)'''
+        vals = (ts, jm['wtp-mac'], jm['ip-addr'], d['name'], d['ap-location']['location'])
+        c.execute(sql, vals)
+    except:
+        print('ap_capwap_data', sql, jm)
+    return
+
+"""
 Cisco-IOS-XE-wireless-access-point-oper:access-point-oper-data/radio-oper-data
 """
 def ap_radio_oper_data(db, c, ts, hwts, jm):
@@ -189,7 +201,7 @@ def main():
     db = mydb.connect()
     c = db.cursor()
 
-    xpaths = ['Cisco-IOS-XE-wireless-client-oper:client-oper-data/common-oper-data', 'Cisco-IOS-XE-wireless-client-oper:client-oper-data/dot11-oper-data', 'Cisco-IOS-XE-wireless-client-oper:client-oper-data/traffic-stats', 'Cisco-IOS-XE-wireless-client-oper:client-oper-data/sisf-db-mac', 'Cisco-IOS-XE-wireless-access-point-oper:access-point-oper-data/radio-oper-data', 'Cisco-IOS-XE-wireless-rrm-oper:rrm-oper-data/rrm-measurement']
+    xpaths = ['Cisco-IOS-XE-wireless-client-oper:client-oper-data/common-oper-data', 'Cisco-IOS-XE-wireless-client-oper:client-oper-data/dot11-oper-data', 'Cisco-IOS-XE-wireless-client-oper:client-oper-data/traffic-stats', 'Cisco-IOS-XE-wireless-client-oper:client-oper-data/sisf-db-mac', 'Cisco-IOS-XE-wireless-access-point-oper:access-point-oper-data/radio-oper-data', 'Cisco-IOS-XE-wireless-access-point-oper:access-point-oper-data/capwap-data', 'Cisco-IOS-XE-wireless-rrm-oper:rrm-oper-data/rrm-measurement']
 
     ## Use get instead of subscribe as subscribe has some issues
     while True:
