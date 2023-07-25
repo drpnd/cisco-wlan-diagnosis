@@ -173,7 +173,7 @@ Cisco-IOS-XE-wireless-rrm-oper:rrm-oper-data/rrm_measurement
 def rrm_measurement(db, c, ts, hwts, jm):
     try:
         sql = '''insert into rrm_measurement (ts, wtp_mac, radio_slot_id, rx_util_percentage, tx_util_percentage, cca_util_percentage, rx_noise_utilization) values(%s, %s, %s, %s, %s, %s, %s)'''
-        vals = (ts, jm['wtp-mac'], jm['radio-slot-id'], jm['load']['rx-util-percentage'], jm['load']['tx-util-percentage'], jm['load']['cca-util-percentage'], jm['load']['rx-noise-utilization'])
+        vals = (ts, jm['wtp-mac'], jm['radio-slot-id'], jm['load']['rx-util-percentage'], jm['load']['tx-util-percentage'], jm['load']['cca-util-percentage'], jm['load']['rx-noise-channel-utilization'])
         c.execute(sql, vals)
     except:
         print('rrm_measurement', sql, jm)
