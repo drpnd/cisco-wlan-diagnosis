@@ -49,8 +49,8 @@ target = '%s:%d' % (args.host, args.port)
 interval = 60 * 2
 
 ## Initialize the GNMI client
-options = [('grpc.max_message_length', 500 * 1024 * 1024)]
-client = cisco_gnmi.ClientBuilder(target).set_os('IOS XE').set_channel_option(options).set_secure_from_file(
+msgsize = 500 * 1024 * 1024
+client = cisco_gnmi.ClientBuilder(target).set_os('IOS XE').set_channel_option('grpc.max_message_length', msgsize).set_secure_from_file(
     root_certificates=args.cacert,
     private_key=args.private_key,
     certificate_chain=args.cert_chain,
