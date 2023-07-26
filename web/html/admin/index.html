@@ -7,7 +7,7 @@
 <meta name="copyright" content="(c) 2023 Hirochika Asai.  All rights reserved." />
 <style>
 body {
-  font: 10px sans-serif;
+  font: 12px sans-serif;
 }
 
 .axis path,
@@ -47,7 +47,10 @@ circle {
 }
 
 div.apinfo {
-  font-size: 18px;
+  font-size: 15px;
+}
+div.apaxix {
+  font-size: 12px;
 }
 div.apbox {
     margin: 0;
@@ -60,9 +63,8 @@ div.apbox {
 div.aptitle {
     margin: 0;
     padding: 0;
-    font-weight: bolder;
-    color: black;
-    font-size: 15px;
+    color: #333333;
+    font-size: 12px;
 }
 
 </style>
@@ -99,6 +101,7 @@ async function update(mac_addr) {
   document.getElementById('speed').innerHTML = '';
   document.getElementById('radio-quality').innerHTML = '';
   document.getElementById('ap-history').innerHTML = '';
+  document.getElementById('ap-axis').innerHTML = '';
 
   // Trying to get the AP
   let path = api_path;
@@ -122,10 +125,14 @@ async function update(mac_addr) {
   }, json, 0, 0, 100);
 
   let ap = document.getElementById('ap-history');
+  let apaxis = document.getElementById('ap-axis');
   let coloridx = 0;
   let cmap = {};
+  let prev = null;
+  let curpos = 0;
   for ( let k in json ) {
     let elem = document.createElement('div');
+    let elem_title = document.createElement('div');
     elem.className = 'apbox';
     if ( json[k]['data'] ) {
       elem.innerHTML = '';
@@ -133,22 +140,30 @@ async function update(mac_addr) {
       if ( !(name in cmap) ) {
         cmap[name] = colormap[coloridx];
         coloridx++;
+        if ( prev != name ) {
+         elem_title.innerText = json[k].time.getFullHour() + ':' + json[k].time.getMinutes();
+      } 
+        prev = name;
       }
       elem.style.backgroundColor = cmap[name];
     } else {
       elem.style.backgroundColor = 'black';
+      if ( prev == null || prev ) {
+        elem_title.innerText = json[k].time.getHours() + ':' + json[k].time.getMinutes();
+      }
+      prev = '';
     }
-    let elem_title = document.createElement('div');
     elem_title.className = 'aptitle';
-    elem.appendChild(elem_title);
+    elem_title.style.position = 'relative';
+    elem_title.style.left = (15 * curpos) + 'px';
+    apaxis.appendChild(elem_title);
     ap.appendChild(elem);
+    curpos++;
   }
   ap.innerHTML += '<br />';
   for ( k in cmap ) {
     ap.innerHTML += '<span style="color:'+ cmap[k] +'">■</span>' + k + '<br />';
   }
-
-  //ap.innerHTML += "<li>" + json[k].name + "@" + json[k].ap_location + " (" + json[k].curr_freq + ")" + "</li>"
 }
 
 function draw_timeseries(selector, keymap, jsondata, default_value, miny, maxy) {
@@ -395,8 +410,6 @@ function draw_stats(selector, jsondata) {
 
 window.onload = function(e) {
   update();
-  //draw_timeseries("#rssi", "./k.json");
-  //draw_timeseries("#rssi", "../admin/api.cgi?f=stats");
 };
 
 function search() {
@@ -413,16 +426,17 @@ MAC address:
 <input type="text" size="30" id="mac-addr" />
 <button onclick="search();">Search</button>
 
+<h2>AP Association History</h2>
+(2 hours ago to current)
+<div id="ap-history" class="apinfo"></div>
+<div id="ap-axis" class="apaxix"></div>
+
 <h2>RSSI History</h2>
 <div id="rssi"></div>
 <h2>Speed History</h2>
 <div id="speed"></div>
 <h2>Radio Quality (AP)</h2>
 <div id="radio-quality"></div>
-
-<h2>AP Association History</h2>
-(2 hours ago to current)
-<div id="ap-history" class="apinfo"></div>
 
 <!--
 <h2>Traffic chart</h2>
