@@ -7,7 +7,7 @@
 <meta name="copyright" content="(c) 2023 Hirochika Asai.  All rights reserved." />
 <style>
 body {
-  font: 15px sans-serif;
+  font: 10px sans-serif;
 }
 
 .axis path,
@@ -46,6 +46,9 @@ circle {
   text-align: center;
 }
 
+div.apinfo {
+  font-size: 18px;
+}
 div.apbox {
     margin: 0;
     padding: 0;
@@ -70,7 +73,7 @@ var margin = {top: 20, right: 180, bottom: 30, left: 50};
 var width = 650 - margin.left - margin.right;
 var height = 200 - margin.top - margin.bottom;
 var parseTime = d3.timeParse("%s");
-var api_path = './api.cgi?f=stats';
+var api_path = '../admin/api.cgi?f=stats';
 
 let colormap = new Array(
   '#ffcdd2',
@@ -403,7 +406,7 @@ window.onload = function(e) {
 
 <h2>AP Association History</h2>
 (2 hours ago to current)
-<div id="ap-history"></div>
+<div id="ap-history" class="apinfo"></div>
 
 <h2>Traffic chart</h2>
 
