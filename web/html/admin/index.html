@@ -66,6 +66,9 @@ div.aptitle {
     color: #333333;
     font-size: 12px;
 }
+div.aplegend {
+  font-size: 15px;
+}
 
 </style>
 </style>
@@ -102,6 +105,7 @@ async function update(mac_addr) {
   document.getElementById('radio-quality').innerHTML = '';
   document.getElementById('ap-history').innerHTML = '';
   document.getElementById('ap-axis').innerHTML = '';
+  document.getElementById('ap-legend').innerHTML = '';
 
   // Trying to get the AP
   let path = api_path;
@@ -126,6 +130,7 @@ async function update(mac_addr) {
 
   let ap = document.getElementById('ap-history');
   let apaxis = document.getElementById('ap-axis');
+  let aplegend = document.getElementById('ap-legend');
   let coloridx = 0;
   let cmap = {};
   let prev = null;
@@ -155,6 +160,7 @@ async function update(mac_addr) {
     }
     elem_title.className = 'aptitle';
     elem_title.style.position = 'relative';
+    elem_title.style.float = 'left';
     elem_title.style.left = (15 * curpos) + 'px';
     apaxis.appendChild(elem_title);
     ap.appendChild(elem);
@@ -162,7 +168,7 @@ async function update(mac_addr) {
   }
   ap.innerHTML += '<br />';
   for ( k in cmap ) {
-    ap.innerHTML += '<span style="color:'+ cmap[k] +'">■</span>' + k + '<br />';
+    aplegend.innerHTML += '<span style="color:'+ cmap[k] +'">■</span>' + k + '<br />';
   }
 }
 
@@ -430,6 +436,7 @@ MAC address:
 (2 hours ago to current)
 <div id="ap-history" class="apinfo"></div>
 <div id="ap-axis" class="apaxix"></div>
+<div id="ap-legend" class="aplegend"></div>
 
 <h2>RSSI History</h2>
 <div id="rssi"></div>
