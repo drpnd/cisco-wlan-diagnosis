@@ -50,6 +50,7 @@ div.apinfo {
   font-size: 15px;
 }
 div.apaxix {
+  height: 1em;
   font-size: 12px;
 }
 div.apbox {
@@ -160,7 +161,7 @@ async function update(mac_addr) {
       prev = '';
     }
     elem_title.className = 'aptitle';
-    elem_title.style.position = 'relative';
+    elem_title.style.position = 'absolute';
     elem_title.style.float = 'left';
     elem_title.style.left = (15 * curpos) + 'px';
     apaxis.appendChild(elem_title);
