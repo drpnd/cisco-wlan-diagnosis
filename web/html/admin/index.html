@@ -7,7 +7,7 @@
 <meta name="copyright" content="(c) 2023 Hirochika Asai.  All rights reserved." />
 <style>
 body {
-  font: 10px sans-serif;
+  font: 15px sans-serif;
 }
 
 .axis path,
@@ -46,6 +46,22 @@ circle {
   text-align: center;
 }
 
+div.apbox {
+    margin: 0;
+    padding: 0;
+    width: 15px;
+    height: 15px;
+    float: left;
+    border: none;
+}
+div.aptitle {
+    margin: 0;
+    padding: 0;
+    font-weight: bolder;
+    color: black;
+    font-size: 15px;
+}
+
 </style>
 </style>
 <script src="./d3.v7.js"></script>
@@ -54,8 +70,78 @@ var margin = {top: 20, right: 180, bottom: 30, left: 50};
 var width = 650 - margin.left - margin.right;
 var height = 200 - margin.top - margin.bottom;
 var parseTime = d3.timeParse("%s");
+var api_path = './api.cgi?f=stats';
 
-function draw_timeseries(selector, jsondata) {
+let colormap = new Array(
+  '#ffcdd2',
+  '#f48fb1',
+  '#e1bee7',
+  '#ede7f6',
+  '#9fa8da',
+  '#bbdefb',
+  '#b2ebf2',
+  '#80cbc4',
+  '#c8e6c9',
+  '#f0f4c3',
+  '#fff176',
+  '#ffcc80',
+  '#bcaaa4',
+);
+
+async function update() {
+
+  let rssi = document.getElementById('rssi');
+  // Clear
+  rssi.innerHTML = '';
+
+  // Trying to get the AP
+  let response = await fetch(api_path);
+  let json = await response.json();
+  json.forEach(function (d) {
+    d.time = new Date(d.ts * 1000);
+  });
+
+  draw_timeseries('#rssi', {'most_recent_rssi': 'RSSI', 'most_recent_snr': 'SNR'},
+    json, -128, null, null);
+  draw_timeseries('#speed', {'speed': 'Speed'}, json, 0, 0, null);
+  draw_timeseries('#radio-quality', {
+    'tx_util_percentage': 'AP Tx utilization',
+    'rx_util_percentage': 'AP Rx utilization',
+    'cca_util_percentage': 'Channel utilization',
+    'rx_noise_channel_utilization': 'Noise'
+  }, json, 0, 0, 100);
+
+  let ap = document.getElementById('ap-history');
+  let coloridx = 0;
+  let cmap = {};
+  for ( let k in json ) {
+    let elem = document.createElement('div');
+    elem.className = 'apbox';
+    if ( json[k]['data'] ) {
+      elem.innerHTML = '';
+      let name = json[k].name + "@" + json[k].ap_location + " (" + json[k].curr_freq + ")";
+      if ( !(name in cmap) ) {
+        cmap[name] = colormap[coloridx];
+        coloridx++;
+      }
+      elem.style.backgroundColor = cmap[name];
+    } else {
+      elem.style.backgroundColor = 'black';
+    }
+    let elem_title = document.createElement('div');
+    elem_title.className = 'aptitle';
+    elem.appendChild(elem_title);
+    ap.appendChild(elem);
+  }
+  ap.innerHTML += '<br />';
+  for ( k in cmap ) {
+    ap.innerHTML += '<span style="color:'+ cmap[k] +'">■</span>' + k + '<br />';
+  }
+
+  //ap.innerHTML += "<li>" + json[k].name + "@" + json[k].ap_location + " (" + json[k].curr_freq + ")" + "</li>"
+}
+
+function draw_timeseries(selector, keymap, jsondata, default_value, miny, maxy) {
     var x = d3.scaleTime()
               .range([0, width]);
 
@@ -81,78 +167,100 @@ function draw_timeseries(selector, jsondata) {
                 .append("g")
                 .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-    d3.json(jsondata).then(function (data) {
-      timeseries = new Array();
-      data.forEach(function (d) {
-        if ( d.data ) {
-          dic = {time: parseTime(d.ts), rssi: d.most_recent_rssi}
-          timeseries.push(dic);
+    timeseries = new Array();
+    let keys = new Array();
+    for ( k in keymap ) {
+      keys.push(keymap[k]);
+    }
+    jsondata.forEach(function (d) {
+      if ( d.data ) {
+        dic = { time: d.time };
+        for ( k in keymap ) {
+          dic[keymap[k]] = d[k];
         }
-      });
-      color.domain(new Array('rssi'));
-      var timeseries_data = color.domain().map(function(name) {
-        return {
-          name: name,
-          values: timeseries.map(function(d) {
-            return {time: d.time, value: d[name]};
-          })
-        };
-      });
+        /*
+        dic = {time: d.time, 'RSSI': d.most_recent_rssi,
+            'SNR': d.most_recent_snr,
+            'AP Tx utilization': d.tx_util_percentage,
+            'AP Rx utilization': d.rx_util_percentage,
+            'Channel utilization': d.cca_util_percentage,
+            'Noise': d.rx_noise_channel_utilization,
+            'Speed': d.speed}
+            */
+        timeseries.push(dic);
+      } else {
+        dic = { time: d.time };
+        for ( k in keymap ) {
+          dic[keymap[k]] = default_value;
+        }
+        timeseries.push(dic);
+      }
+    });
+    color.domain(keys);
+    var timeseries_data = color.domain().map(function(name) {
+      return {
+        name: name,
+        values: timeseries.map(function(d) {
+          return {time: d.time, value: d[name]};
+        })
+      };
+    });
 
-      x.domain(d3.extent(timeseries, function(d) { return d.time; }));
-      y.domain([
-                d3.min(timeseries_data, function(c) { return d3.min(c.values, function(v) { return v.value; }); }),
-                d3.max(timeseries_data, function(c) { return d3.max(c.values, function(v) { return v.value; }); })
-      ]);
+    if ( miny == null ) {
+      miny = d3.min(timeseries_data, function(c) { return d3.min(c.values, function(v) { return v.value; }); });
+    }
+    if ( maxy == null ) {
+      maxy = d3.max(timeseries_data, function(c) { return d3.max(c.values, function(v) { return v.value; }); });
+    }
+    x.domain(d3.extent(timeseries, function(d) { return d.time; }));
+    y.domain([miny, maxy]);
 
-      svg.append("g")
-        .attr("class", "x axis")
-        .attr("transform", "translate(0," + height + ")")
-        .call(xAxis);
+    svg.append("g")
+      .attr("class", "x axis")
+      .attr("transform", "translate(0," + height + ")")
+      .call(xAxis);
 
-      svg.append("g")
-        .attr("class", "y axis")
-        .call(yAxis)
-        .append("text")
-        .attr("transform", "rotate(-90)")
-        .attr("x", -30)
-        .attr("y", -46)
-        .attr("dy", ".71em")
-        .style("text-anchor", "end")
-        .text("RSSI");
+    svg.append("g")
+      .attr("class", "y axis")
+      .call(yAxis)
+      .append("text")
+      .attr("transform", "rotate(-90)")
+      .attr("x", -30)
+      .attr("y", -46)
+      .attr("dy", ".71em")
+      .style("text-anchor", "end")
+      .text("Value");
 
-      var tspath = svg.selectAll(".timeseries")
-                      .data(timeseries_data)
-                      .enter().append("g")
-                      .attr("class", "timeseries");
+    var tspath = svg.selectAll(".timeseries")
+                    .data(timeseries_data)
+                    .enter().append("g")
+                    .attr("class", "timeseries");
 
-      tspath.append("path")
-            .attr("class", "line")
-            .attr("d", function(d) { return line(d.values); })
-            .style("stroke", function(d) { return color(d.name); });
+    tspath.append("path")
+          .attr("class", "line")
+          .attr("d", function(d) { return line(d.values); })
+          .style("stroke", function(d) { return color(d.name); });
 
-      var legend = svg.selectAll(".legend")
-                      .data(color.domain().slice())
-                      .enter().append("g")
-                      .attr("class", "legend")
-                      .attr("transform", function(d, i) { return "translate(120," + ( i * 18 ) + ")"; });
+    var legend = svg.selectAll(".legend")
+                    .data(color.domain().slice())
+                    .enter().append("g")
+                    .attr("class", "legend")
+                    .attr("transform", function(d, i) { return "translate(120," + ( i * 18 ) + ")"; });
 
-      legend.append("rect")
-            .attr("x", width - 18)
-            .attr("y", 8)
-            .attr("width", 18)
-            .attr("height", 2)
-            .style("fill", color);
+    legend.append("rect")
+          .attr("x", width - 18)
+          .attr("y", 8)
+          .attr("width", 18)
+          .attr("height", 2)
+          .style("fill", color);
 
-      legend.append("text")
-            .attr("x", width - 24)
-            .attr("y", 9)
-            .attr("dy", ".35em")
-            .style("text-anchor", "end")
-            .text(function(d) { return d; });
+    legend.append("text")
+          .attr("x", width - 24)
+          .attr("y", 9)
+          .attr("dy", ".35em")
+          .style("text-anchor", "end")
+          .text(function(d) { return d; });
 
-      //console.log(timeseries);
-    }).catch(function (error){console.log("error")});
 }
 function draw_stats(selector, jsondata) {
          var x = d3.time.scale()
@@ -276,22 +384,31 @@ function draw_stats(selector, jsondata) {
 }
 
 window.onload = function(e) {
-    //draw_timeseries("#rssi", "./tmp.json");
-    draw_timeseries("#rssi", "../admin/api.cgi?f=stats");
+  update();
+  //draw_timeseries("#rssi", "./k.json");
+  //draw_timeseries("#rssi", "../admin/api.cgi?f=stats");
 };
 
 </script>
 
 <body>
-<h1>Your Statistics</h1>
+<h1>Your Activity</h1>
 
 <h2>RSSI History</h2>
 <div id="rssi"></div>
+<h2>Speed History</h2>
+<div id="speed"></div>
+<h2>Radio Quality (AP)</h2>
+<div id="radio-quality"></div>
+
+<h2>AP Association History</h2>
+(2 hours ago to current)
+<div id="ap-history"></div>
 
 <h2>Traffic chart</h2>
 
-<h2>AP</h2>
 
 </body>
 </html>
+
 
