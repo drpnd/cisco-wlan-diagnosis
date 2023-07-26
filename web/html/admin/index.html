@@ -73,8 +73,8 @@ var margin = {top: 20, right: 180, bottom: 30, left: 50};
 var width = 650 - margin.left - margin.right;
 var height = 200 - margin.top - margin.bottom;
 var parseTime = d3.timeParse("%s");
-//var api_path = './k.json';
-var api_path = '../admin/api.cgi?f=admin_stats';
+var api_path = '../admin/api.cgi?f=stats';
+var api_path_admin = '../admin/api.cgi?f=admin_stats';
 
 let colormap = new Array(
   '#ffcdd2',
@@ -101,7 +101,11 @@ async function update(mac_addr) {
   document.getElementById('ap-history').innerHTML = '';
 
   // Trying to get the AP
-  let response = await fetch(api_path + '&mac='+encodeURIComponent(mac_addr));
+  let path = api_path;
+  if ( mac_addr ) {
+    path = api_path_admin + '&mac='+encodeURIComponent(mac_addr);
+  }
+  let response = await fetch(path);
   let json = await response.json();
   json.forEach(function (d) {
     d.time = new Date(d.ts * 1000);
@@ -390,7 +394,7 @@ function draw_stats(selector, jsondata) {
 }
 
 window.onload = function(e) {
-  update('');
+  update();
   //draw_timeseries("#rssi", "./k.json");
   //draw_timeseries("#rssi", "../admin/api.cgi?f=stats");
 };
