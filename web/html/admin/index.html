@@ -141,7 +141,7 @@ async function update(mac_addr) {
         cmap[name] = colormap[coloridx];
         coloridx++;
         if ( prev != name ) {
-         elem_title.innerText = json[k].time.getFullHour() + ':' + json[k].time.getMinutes();
+         elem_title.innerText = json[k].time.getHours() + ':' + json[k].time.getMinutes();
       } 
         prev = name;
       }
