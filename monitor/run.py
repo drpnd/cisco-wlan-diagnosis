@@ -154,6 +154,18 @@ def ap_capwap_data(db, c, ts, hwts, jm):
     return
 
 """
+Cisco-IOS-XE-wireless-access-point-oper:access-point-oper-data/radio-oper-stats
+"""
+def ap_radio_oper_stats(db, c, ts, hwts, jm):
+    try:
+        sql = '''insert into ap_radio_oper_stats (ts, ap_mac, slot_id, aid_user_list, tx_fragment_count, multicast_tx_frame_cnt, failed_count, retry_count, multiple_retry_count, frame_duplicate_count, rts_success_count, rts_failure_count, ack_failure_count, rx_fragment_count, multicast_rx_frame_cnt, fcs_error_count, tx_frame_count, wep_undecryptable_count, rx_error_frame_count, mac_mic_err_frame_count, rx_mgmt_frame_count, rx_ctrl_frame_count, rx_data_frame_count, tx_mgmt_frame_count, tx_ctrl_frame_count, tx_data_frame_count, rx_data_pkt_count, tx_data_pkt_count, noise_floor, stuck_ts, last_ts, num_radio_stuck_reset) values(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'''
+        vals = (ts, jm['ap-mac'], jm['slot-id'], jm['aid-user-list'], jm['tx-fragment-count'], jm['multicast-tx-frame-cnt'], jm['failed-count'], jm['retry-count'], jm['multiple-retry-count'], jm['frame-duplicate-count'], jm['rts-success-count'], jm['rts-failure-count'], jm['ack-failure-count'], jm['rx-fragment-count'], jm['multicast-rx-frame-cnt'], jm['fcs-error-count'], jm['tx-frame-count'], jm['wep-undecryptable-count'], jm['rx-error-frame-count'], jm['mac-mic-err-frame-count'], jm['rx-mgmt-frame-count'], jm['rx-ctrl-frame-count'], jm['rx-data-frame-count'], jm['tx-mgmt-frame-count'], jm['tx-ctrl-frame-count'], jm['tx-data-frame-count'], jm['rx-data-pkt-count'], jm['tx-data-pkt-count'], jm['noise-floor'], jm['ap-radio-stats']['stuck-ts'], jm['ap-radio-stats']['last-ts'], jm['ap-radio-stats']['num-radio-stuck-reset'])
+        c.execute(sql, vals)
+    except:
+        print('ap_radio_oper_stats', sql, jm)
+    return
+
+"""
 Cisco-IOS-XE-wireless-access-point-oper:access-point-oper-data/radio-oper-data
 """
 def ap_radio_oper_data(db, c, ts, hwts, jm):
@@ -227,6 +239,8 @@ def main():
                             ap_radio_oper_data(db, c, ts, hwts, json.loads(um.val.json_ietf_val))
                         elif um.path.elem[1].name == 'capwap-data':
                             ap_capwap_data(db, c, ts, hwts, json.loads(um.val.json_ietf_val))
+                        elif um.path.elem[1].name == 'radio-oper-stats':
+                            ap_radio_oper_stats(db, c, ts, hwts, json.loads(um.val.json_ietf_val))
                     elif um.path.elem[0].name == 'Cisco-IOS-XE-wireless-rrm-oper:rrm-oper-data':
                         if um.path.elem[1].name == 'rrm-measurement':
                             rrm_measurement(db, c, ts, hwts, json.loads(um.val.json_ietf_val))
