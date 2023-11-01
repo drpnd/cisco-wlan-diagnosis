@@ -213,7 +213,7 @@ def main():
     db = mydb.connect()
     c = db.cursor()
 
-    xpaths = ['Cisco-IOS-XE-wireless-client-oper:client-oper-data/common-oper-data', 'Cisco-IOS-XE-wireless-client-oper:client-oper-data/dot11-oper-data', 'Cisco-IOS-XE-wireless-client-oper:client-oper-data/traffic-stats', 'Cisco-IOS-XE-wireless-client-oper:client-oper-data/sisf-db-mac', 'Cisco-IOS-XE-wireless-access-point-oper:access-point-oper-data/radio-oper-data', 'Cisco-IOS-XE-wireless-access-point-oper:access-point-oper-data/capwap-data', 'Cisco-IOS-XE-wireless-rrm-oper:rrm-oper-data/rrm-measurement']
+    xpaths = ['Cisco-IOS-XE-wireless-client-oper:client-oper-data/common-oper-data', 'Cisco-IOS-XE-wireless-client-oper:client-oper-data/dot11-oper-data', 'Cisco-IOS-XE-wireless-client-oper:client-oper-data/traffic-stats', 'Cisco-IOS-XE-wireless-client-oper:client-oper-data/sisf-db-mac', 'Cisco-IOS-XE-wireless-access-point-oper:access-point-oper-data/radio-oper-data', 'Cisco-IOS-XE-wireless-access-point-oper:access-point-oper-data/capwap-data', 'Cisco-IOS-XE-wireless-access-point-oper:access-point-oper-data/radio-oper-stats', 'Cisco-IOS-XE-wireless-rrm-oper:rrm-oper-data/rrm-measurement']
 
     ## Use get instead of subscribe as subscribe has some issues
     while True:
