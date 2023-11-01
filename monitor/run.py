@@ -213,13 +213,22 @@ def main():
     db = mydb.connect()
     c = db.cursor()
 
-    xpaths = ['Cisco-IOS-XE-wireless-client-oper:client-oper-data/common-oper-data', 'Cisco-IOS-XE-wireless-client-oper:client-oper-data/dot11-oper-data', 'Cisco-IOS-XE-wireless-client-oper:client-oper-data/traffic-stats', 'Cisco-IOS-XE-wireless-client-oper:client-oper-data/sisf-db-mac', 'Cisco-IOS-XE-wireless-access-point-oper:access-point-oper-data/radio-oper-data', 'Cisco-IOS-XE-wireless-access-point-oper:access-point-oper-data/capwap-data', 'Cisco-IOS-XE-wireless-access-point-oper:access-point-oper-data/radio-oper-stats', 'Cisco-IOS-XE-wireless-rrm-oper:rrm-oper-data/rrm-measurement']
+    xpathsets = [
+        ['Cisco-IOS-XE-wireless-client-oper:client-oper-data/common-oper-data'],
+        ['Cisco-IOS-XE-wireless-client-oper:client-oper-data/dot11-oper-data'],
+        ['Cisco-IOS-XE-wireless-client-oper:client-oper-data/traffic-stats'],
+        ['Cisco-IOS-XE-wireless-client-oper:client-oper-data/sisf-db-mac'],
+        ['Cisco-IOS-XE-wireless-access-point-oper:access-point-oper-data/radio-oper-data',
+         'Cisco-IOS-XE-wireless-access-point-oper:access-point-oper-data/capwap-data',
+         'Cisco-IOS-XE-wireless-access-point-oper:access-point-oper-data/radio-oper-stats'],
+        ['Cisco-IOS-XE-wireless-rrm-oper:rrm-oper-data/rrm-measurement']
+    ]
 
     ## Use get instead of subscribe as subscribe has some issues
     while True:
         ts = int(time.time())
-        for xpath in xpaths:
-            response = client.get_xpaths([xpath], data_type='STATE', encoding='JSON_IETF')
+        for xpaths in xpathsets:
+            response = client.get_xpaths(xpaths, data_type='STATE', encoding='JSON_IETF')
             for msg in response.notification:
                 ## Timestamp
                 hwts = msg.timestamp
