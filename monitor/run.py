@@ -79,7 +79,7 @@ def client_common_oper_data(db, c, ts, hwts, jm):
 Cisco-IOS-XE-wireless-client-oper:client-oper-data/dot11-oper-data
 """
 def client_dot11_oper_data(db, c, ts, hwts, jm):
-    sql = '''insert into client_dot11_oper_data (ts, hwts, ms_mac_address, ms_bssid, ap_mac_address, current_channel, ms_wlan_id, vap_ssid, policy_profile, ms_ap_slot_id, radio_type, ms_assoc_time, is_11g_client, ewlc_ms_phy_type, encryption_type, dot11_6ghz_cap) values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'''
+    sql = '''insert into client_dot11_oper_data (ts, hwts, ms_mac_address, ms_bssid, ap_mac_address, current_channel, ms_wlan_id, vap_ssid, policy_profile, ms_ap_slot_id, radio_type, ms_assoc_time, is_11g_client, wpa_version, cipher_suite, auth_key_mgmt, group_mgmt_cipher_suite, group_cipher_suite, pwe_mode, ewlc_ms_phy_type, encryption_type, dot11_6ghz_cap) values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'''
     v1 = False
     try:
         if jm['is-11g-client'] == 'true':
@@ -93,7 +93,7 @@ def client_dot11_oper_data(db, c, ts, hwts, jm):
     except:
         pass
     try:
-        vals = (ts, hwts, jm['ms-mac-address'], jm['ms-bssid'], jm['ap-mac-address'], jm['current-channel'], jm['ms-wlan-id'], jm['vap-ssid'], jm['policy-profile'], jm['ms-ap-slot-id'], jm['radio-type'], jm['ms-assoc-time'], v1, jm['ewlc-ms-phy-type'], jm['encryption-type'], v2)
+        vals = (ts, hwts, jm['ms-mac-address'], jm['ms-bssid'], jm['ap-mac-address'], jm['current-channel'], jm['ms-wlan-id'], jm['vap-ssid'], jm['policy-profile'], jm['ms-ap-slot-id'], jm['radio-type'], jm['ms-assoc-time'], v1, jm['wpa-version'], jm['cipher-suite'], jm['auth-key-mgmt'], jm['group-mgmt-cipher-suite'], jm['group-cipher-suite'], jm['pwe-mode'], jm['ewlc-ms-phy-type'], jm['encryption-type'], v2)
         c.execute(sql, vals)
     except:
         print('client_dot11_oper_data', sql, jm)
