@@ -120,6 +120,21 @@ async function update(mac_addr) {
     d.time = new Date(d.ts * 1000);
   });
 
+  // Calculate Tx/Rx bps
+  jsondata.forEach(function (d) {
+    let prev = null;
+    if ( d.data ) {
+      if ( prev ) {
+        d.bps_tx = 8.0 * (d.bytes_tx - prev.bytes_tx) / 1000 / 1000;
+        d.bps_rx = 8.0 * (d.bytes_rx - prev.bytes_rx) / 1000 / 1000;
+      } else {
+        d.bps_tx = 0.0;
+        d.bps_rx = 0.0;
+      }
+      prev = d.data;
+    }
+  });
+
   draw_timeseries('#rssi', {'most_recent_rssi': 'RSSI', 'most_recent_snr': 'SNR'},
     json, -128, null, null);
   draw_timeseries('#speed', {'speed': 'Speed'}, json, 0, 0, null);
@@ -129,6 +144,10 @@ async function update(mac_addr) {
     'cca_util_percentage': 'Channel utilization',
     'rx_noise_channel_utilization': 'Noise'
   }, json, 0, 0, 100);
+  draw_timeseries('#traffic', {
+    'bps_tx': 'Tx',
+    'bps_rx': 'Rx'
+  }, json, 0, null,  null);
 
   let ap = document.getElementById('ap-history');
   let apaxis = document.getElementById('ap-axis');
@@ -446,6 +465,9 @@ MAC address:
 <div id="speed"></div>
 <h2>Radio Quality (AP)</h2>
 <div id="radio-quality"></div>
+
+<h2>Traffic chart</h2>
+<div id="traffic"></div>
 
 <!--
 <h2>Traffic chart</h2>

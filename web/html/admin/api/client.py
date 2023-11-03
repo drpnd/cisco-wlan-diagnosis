@@ -103,6 +103,17 @@ def statistics(mac_addr, ts_min, ts_max):
     print(json.dumps(hist))
     return
 
+"""
+Get related syslog
+"""
+def syslog(mac_addr, ts_min, ts_max):
+    ## Database preparation
+    db = api.mydb.connect()
+    c = db.cursor()
+    sql = 'select * from logs where msg like %s limit 10'
+    c.execute(sql, (mac_addr,))
+    pass
+
 def token(args):
     ## Database preparation
     db = api.mydb.connect()
