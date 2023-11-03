@@ -121,17 +121,17 @@ async function update(mac_addr) {
   });
 
   // Calculate Tx/Rx bps
+  let prev_data = null;
   json.forEach(function (d) {
-    let prev = null;
     if ( d.data ) {
-      if ( prev ) {
-        d.bps_tx = 8.0 * (d.bytes_tx - prev.bytes_tx) / 1000 / 1000;
-        d.bps_rx = 8.0 * (d.bytes_rx - prev.bytes_rx) / 1000 / 1000;
+      if ( prev_data ) {
+        d.bps_tx = 8.0 * (d.bytes_tx - prev_data.bytes_tx) / 1000 / 1000;
+        d.bps_rx = 8.0 * (d.bytes_rx - prev_data.bytes_rx) / 1000 / 1000;
       } else {
         d.bps_tx = 0.0;
         d.bps_rx = 0.0;
       }
-      prev = d.data;
+      prev_data = d;
     }
   });
 
