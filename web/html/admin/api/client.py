@@ -114,7 +114,7 @@ def syslog(mac_addr, ts_min, ts_max):
     ## Database preparation
     db = api.mydb.connect()
     c = db.cursor()
-    sql = 'select * from logs where msg like %s order by seq desc limit 10'
+    sql = 'select * from logs where msg like %s order by seq desc limit 20'
     c.execute(sql, ('%'+cmac+'%',))
     res = c.fetchall()
     cols = c.column_names
