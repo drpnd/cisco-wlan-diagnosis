@@ -81,6 +81,14 @@ def main():
         except:
             return False
         api.client.statistics(mac_addr, ts - 7200, ts)
+    elif f == 'syslog':
+        db = api.mydb.connect()
+        c = db.cursor()
+        ts = int(time.time())
+        mac_addr = api.client.resolve_macaddr(db, c)
+        if not mac_addr:
+            return False
+        api.client.syslog(mac_addr, ts - 7200, ts)
     elif f == 'token':
         api.client.token(args)
     else:
