@@ -121,7 +121,7 @@ async function update(mac_addr) {
   });
 
   // Calculate Tx/Rx bps
-  jsondata.forEach(function (d) {
+  json.forEach(function (d) {
     let prev = null;
     if ( d.data ) {
       if ( prev ) {
