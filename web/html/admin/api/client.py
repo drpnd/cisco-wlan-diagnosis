@@ -112,6 +112,15 @@ def syslog(mac_addr, ts_min, ts_max):
     c = db.cursor()
     sql = 'select * from logs where msg like %s limit 10'
     c.execute(sql, ('%'+mac_addr+'%',))
+    res = c.fetchall()
+    cols = c.column_names
+    l = []
+    for r in res:
+        r  = dict(zip(cols, r))
+        d = {'datetime': r['datetime'], 'msg': r['msg']}
+        l.append(d)
+    print("Content-type: application/json\r\n")
+    print(json.dumps(l))
     pass
 
 def token(args):
