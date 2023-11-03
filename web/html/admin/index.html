@@ -125,8 +125,9 @@ async function update(mac_addr) {
   json.forEach(function (d) {
     if ( d.data ) {
       if ( prev_data ) {
-        d.bps_tx = 8.0 * (d.bytes_tx - prev_data.bytes_tx) / 1000 / 1000;
-        d.bps_rx = 8.0 * (d.bytes_rx - prev_data.bytes_rx) / 1000 / 1000;
+        let diff_ts = d.ts - prev_data.ts;
+        d.bps_tx = 8.0 * (d.bytes_tx - prev_data.bytes_tx) / diff_ts / 1000 / 1000;
+        d.bps_rx = 8.0 * (d.bytes_rx - prev_data.bytes_rx) / diff_ts / 1000 / 1000;
       } else {
         d.bps_tx = 0.0;
         d.bps_rx = 0.0;
@@ -145,8 +146,8 @@ async function update(mac_addr) {
     'rx_noise_channel_utilization': 'Noise'
   }, json, 0, 0, 100);
   draw_timeseries('#traffic', {
-    'bps_tx': 'Tx',
-    'bps_rx': 'Rx'
+    'bps_tx': 'Download',
+    'bps_rx': 'Upload'
   }, json, 0, null,  null);
 
   let ap = document.getElementById('ap-history');
