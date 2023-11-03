@@ -107,11 +107,14 @@ def statistics(mac_addr, ts_min, ts_max):
 Get related syslog
 """
 def syslog(mac_addr, ts_min, ts_max):
+    ## Cisco style mac address
+    m = mac_addr.split(':')
+    cmac = '.'.join([''.join(e) for e in zip(m[0::2], m[1::2])])
     ## Database preparation
     db = api.mydb.connect()
     c = db.cursor()
-    sql = 'select * from logs where msg like %s limit 10'
-    c.execute(sql, ('%'+mac_addr+'%',))
+    sql = 'select * from logs where msg like %s order by seq desc limit 10'
+    c.execute(sql, ('%'+cmac+'%',))
     res = c.fetchall()
     cols = c.column_names
     l = []
