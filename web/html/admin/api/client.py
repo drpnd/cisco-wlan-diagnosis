@@ -111,7 +111,7 @@ def syslog(mac_addr, ts_min, ts_max):
     db = api.mydb.connect()
     c = db.cursor()
     sql = 'select * from logs where msg like %s limit 10'
-    c.execute(sql, (mac_addr,))
+    c.execute(sql, ('%'+mac_addr+'%',))
     pass
 
 def token(args):
