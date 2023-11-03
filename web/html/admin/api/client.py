@@ -4,6 +4,7 @@ import time
 import json
 import api.config
 import api.mydb
+import datetime
 
 """
 Resolve the IP address of the requested client
@@ -120,7 +121,7 @@ def syslog(mac_addr, ts_min, ts_max):
     l = []
     for r in res:
         r  = dict(zip(cols, r))
-        d = {'datetime': r['datetime'], 'msg': r['msg']}
+        d = {'seq': r['seq'], 'datetime': datetime.datetime.timestamp(r['datetime']), 'msg': r['msg']}
         l.append(d)
     print("Content-type: application/json\r\n")
     print(json.dumps(l))
