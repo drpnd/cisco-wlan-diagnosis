@@ -96,9 +96,23 @@ def apremove(data):
         apname = data[OID_BSNAPNAME + '.' + macoid]
     except:
         return False
+    # Try to get location information from the database
+    location = 'Unknown'
+    try:
+        db = mydb.connect()
+        c = db.cursor()
+        sql = '''select * from ap_capwap_data where wtp_mac=%s order by ts desc limit 1'''
+        c.execute(sql, (macoid, ))
+        res = c.fetchone()
+        if res:
+            d = dict(zip(c.column_names, res))
+            location = d['ap_location']
+    except:
+        pass
+
     detail = "  AP: {}\n".format(apname)
     detail = detail + "  MAC address: {}\n".format(mac)
-    post_slack("*AP disassociated* at Uptime @ {}\n{}".format(uptime, detail))
+    post_slack("*AP disassociated* at Uptime @ {} (Location: {})\n{}".format(uptime, location, detail))
 
     return True
 
