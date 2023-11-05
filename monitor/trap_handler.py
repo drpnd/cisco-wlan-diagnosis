@@ -100,7 +100,7 @@ def apremove(data):
     location = 'Unknown'
     try:
         l = mac.strip('"').strip().lower().split()
-        mac_str = '.'.join([''.join(a) for a in zip(l[0::2], l[1::2])])
+        mac_str = ':'.join(l)
         db = mydb.connect()
         c = db.cursor()
         sql = '''select * from ap_capwap_data where wtp_mac=%s order by ts desc limit 1'''
