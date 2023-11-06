@@ -82,6 +82,8 @@ var height = 200 - margin.top - margin.bottom;
 var parseTime = d3.timeParse("%s");
 var api_path = './api.cgi?f=stats';
 var api_path_admin = './api.cgi?f=admin_stats';
+var api_syslog_path = './api.cgi?f=syslog';
+var api_syslog_path_admin = './api.cgi?f=admin_syslog';
 
 let colormap = new Array(
   '#ffcdd2',
@@ -108,6 +110,8 @@ async function update(mac_addr) {
   document.getElementById('ap-history').innerHTML = '';
   document.getElementById('ap-axis').innerHTML = '';
   document.getElementById('ap-legend').innerHTML = '';
+  document.getElementById('traffic').innerHTML = '';
+  document.getElementById('syslog').innerHTML = '';
 
   // Trying to get the AP
   let path = api_path;
@@ -192,6 +196,21 @@ async function update(mac_addr) {
   for ( k in cmap ) {
     aplegend.innerHTML += '<span style="color:'+ cmap[k] +'">■</span>' + k + '<br />';
   }
+
+  // Try to draw syslog
+  let syslog_path = api_syslog_path;
+  if ( mac_addr ) {
+    syslog_path = api_syslog_path_admin + '&mac='+encodeURIComponent(mac_addr);
+  }
+  response = await fetch(path);
+  json = await response.json();
+  let elem = document.getElementById('syslog');
+  json.forEach(function (d) {
+    d.time = new Date(d.datetime * 1000);
+    let celem = document.createElement('pre');
+    celem.innerText = d.time + '\t' + d.msg;
+    elem.appendChild(celem);
+  });
 }
 
 function draw_timeseries(selector, keymap, jsondata, default_value, miny, maxy) {
@@ -470,9 +489,8 @@ MAC address:
 <h2>Traffic chart</h2>
 <div id="traffic"></div>
 
-<!--
-<h2>Traffic chart</h2>
--->
+<h2</h3>
+<div id="syslog"></div>
 
 </body>
 </html>
