@@ -202,13 +202,16 @@ async function update(mac_addr) {
   if ( mac_addr ) {
     syslog_path = api_syslog_path_admin + '&mac='+encodeURIComponent(mac_addr);
   }
-  response = await fetch(path);
+  response = await fetch(syslog_path);
   json = await response.json();
   let elem = document.getElementById('syslog');
   json.forEach(function (d) {
     d.time = new Date(d.datetime * 1000);
-    let celem = document.createElement('pre');
-    celem.innerText = d.time + '\t' + d.msg;
+    let celem = document.createElement('div');
+    celem.innerHTML = '<b>'
+    celem.innerText += d.time;
+    celem.innerHTML += '</b>';
+    celem.innerText += d.msg;
     elem.appendChild(celem);
   });
 }
