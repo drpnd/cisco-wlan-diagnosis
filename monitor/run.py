@@ -137,8 +137,11 @@ def client_sisf_db_mac(db, c, ts, hwts, jm):
         vals = (ts, ipv4, jm['mac-addr'])
         c.execute(sql, vals)
     for ipv6 in ipv6list:
-        vals = (ts, ipv6, jm['mac-addr'])
-        c.execute(sql, vals)
+        try:
+            vals = (ts, ipv6, jm['mac-addr'])
+            c.execute(sql, vals)
+        except:
+            print('ipbinding', sql, vals)
     return
 
 """
