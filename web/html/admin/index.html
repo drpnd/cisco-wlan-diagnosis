@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <title>Your Statistics</title>
 <meta name="Author" content="Hirochika Asai." />
-<meta name="copyright" content="(c) 2023 Hirochika Asai.  All rights reserved." />
+<meta name="copyright" content="(c) 2023-2024 Hirochika Asai.  All rights reserved." />
 <style>
 body {
   font: 12px sans-serif;
@@ -188,7 +188,15 @@ async function update(mac_addr) {
     } else {
       elem.style.backgroundColor = 'black';
       if ( prev == null || prev ) {
-        elem_title.innerText = json[k].time.getHours() + ':' + json[k].time.getMinutes();
+        let hh = json[k].time.getHours();
+        let mm = json[k].time.getMinutes();
+        if ( hh < 10 ) {
+          hh = '0' + hh;
+        }
+        if ( mm < 10 ) {
+          mm = '0' + mm;
+        }
+        elem_title.innerText = hh + ':' + mm;
       }
       prev = '';
     }
