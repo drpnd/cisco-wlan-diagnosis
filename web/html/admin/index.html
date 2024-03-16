@@ -132,6 +132,10 @@ async function update(mac_addr) {
         let diff_ts = d.ts - prev_data.ts;
         d.bps_tx = 8.0 * (d.bytes_tx - prev_data.bytes_tx) / diff_ts / 1000 / 1000;
         d.bps_rx = 8.0 * (d.bytes_rx - prev_data.bytes_rx) / diff_ts / 1000 / 1000;
+        if ( d.bps_tx < 0 || d.bps_rx < 0 ) {
+          d.bps_tx = 0.0;
+          d.bps_rx = 0.0;
+        }
       } else {
         d.bps_tx = 0.0;
         d.bps_rx = 0.0;
