@@ -2,7 +2,7 @@
 
 # -*- coding: utf-8 -*-
 """
-Copyright (c) 2023 Hirochika Asai <asai@jar.jp>
+Copyright (c) 2023-2024 Hirochika Asai <asai@jar.jp>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -26,6 +26,7 @@ SOFTWARE.
 import cgi
 import os
 import time
+import re
 import api.client
 
 
@@ -79,6 +80,14 @@ def main():
         try:
             mac_addr = args['mac'].value
         except:
+            return False
+        ## Sanitize the MAC address
+        mac_addr = mac_addr.lower()
+        result = re.match('^([0-9a-f]{4})\.([0-9a-f]{4})\.([0-9a-f]{4})$', mac_addr)
+        if result:
+            mac_addr = result.group(1)[0:2] + ':' + result.group(1)[2:4] + ':' + result.group(2)[0:2] + ':' + result.group(2)[2:4] + ':' + result.group(3)[0:2] + ':' + result.group(3)[2:4]
+        result = re.match('^[0-9a-f]{2}:[0-9a-f]{2}:[0-9a-f]{2}:[0-9a-f]{2}:[0-9a-f]{2}:[0-9a-f]{2}$', mac_addr)
+        if not result:
             return False
         api.client.statistics(mac_addr, ts - 7200, ts)
     elif f == 'syslog':
