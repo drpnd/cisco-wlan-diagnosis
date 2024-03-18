@@ -106,6 +106,14 @@ def main():
             mac_addr = args['mac'].value
         except:
             return False
+        ## Sanitize the MAC address
+        mac_addr = mac_addr.lower()
+        result = re.match('^([0-9a-f]{4})\.([0-9a-f]{4})\.([0-9a-f]{4})$', mac_addr)
+        if result:
+            mac_addr = result.group(1)[0:2] + ':' + result.group(1)[2:4] + ':' + result.group(2)[0:2] + ':' + result.group(2)[2:4] + ':' + result.group(3)[0:2] + ':' + result.group(3)[2:4]
+        result = re.match('^[0-9a-f]{2}:[0-9a-f]{2}:[0-9a-f]{2}:[0-9a-f]{2}:[0-9a-f]{2}:[0-9a-f]{2}$', mac_addr)
+        if not result:
+            return False
         api.client.syslog(mac_addr, ts - 7200, ts)
     elif f == 'token':
         api.client.token(args)
