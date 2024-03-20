@@ -479,7 +479,11 @@ function draw_stats(selector, jsondata) {
 }
 
 window.onload = function(e) {
-  update();
+  const params = new Proxy(new URLSearchParams(window.location.search), {
+    get: (searchParams, prop) => searchParams.get(prop),
+  });
+  let mac_addr = params.mac_addr;
+  update(mac_addr);
 };
 
 function search() {
