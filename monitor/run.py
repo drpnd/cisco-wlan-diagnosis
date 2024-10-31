@@ -173,10 +173,13 @@ Cisco-IOS-XE-wireless-access-point-oper:access-point-oper-data/radio-oper-data
 """
 def ap_radio_oper_data(db, c, ts, hwts, jm):
     vht = False
+    subband = None
     if jm['phy-ht-cfg']['cfg-data']['vht-enable'] == 'true':
         vht = True
+    if jm['radio-slot-id'] == 1:
+        subband = jm['radio-subband']
     sql = '''insert into ap_radio_oper_data (ts, wtp_mac, radio_slot_id, slot_id, radio_type, admin_state, oper_state, radio_mode, radio_sub_mode, radio_subtype, radio_subband, ht_enable, phy_ht_cfg_config_type, curr_freq, chan_width, ext_chan, vht_enable, rrm_channel_change_reason) values(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'''
-    vals = (ts, jm['wtp-mac'], jm['radio-slot-id'], jm['slot-id'], jm['radio-type'], jm['admin-state'], jm['oper-state'], jm['radio-mode'], jm['radio-sub-mode'], jm['radio-subtype'], jm['radio-subband'], jm['phy-ht-cfg']['cfg-data']['ht-enable'], jm['phy-ht-cfg']['cfg-data']['phy-ht-cfg-config-type'], jm['phy-ht-cfg']['cfg-data']['curr-freq'], jm['phy-ht-cfg']['cfg-data']['chan-width'], jm['phy-ht-cfg']['cfg-data']['ext-chan'], vht, jm['phy-ht-cfg']['cfg-data']['rrm-channel-change-reason'])
+    vals = (ts, jm['wtp-mac'], jm['radio-slot-id'], jm['slot-id'], jm['radio-type'], jm['admin-state'], jm['oper-state'], jm['radio-mode'], jm['radio-sub-mode'], jm['radio-subtype'], subband, jm['phy-ht-cfg']['cfg-data']['ht-enable'], jm['phy-ht-cfg']['cfg-data']['phy-ht-cfg-config-type'], jm['phy-ht-cfg']['cfg-data']['curr-freq'], jm['phy-ht-cfg']['cfg-data']['chan-width'], jm['phy-ht-cfg']['cfg-data']['ext-chan'], vht, jm['phy-ht-cfg']['cfg-data']['rrm-channel-change-reason'])
     c.execute(sql, vals)
     if 'vap-oper-config' in jm:
         try:

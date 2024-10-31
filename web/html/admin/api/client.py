@@ -121,7 +121,9 @@ def syslog(mac_addr, ts_min, ts_max):
     l = []
     for r in res:
         r  = dict(zip(cols, r))
-        d = {'seq': r['seq'], 'datetime': datetime.datetime.timestamp(r['datetime']), 'msg': r['msg']}
+        dt = r['datetime']
+        dt = dt.replace(tzinfo=datetime.timezone.utc)
+        d = {'seq': r['seq'], 'datetime': datetime.datetime.timestamp(dt), 'msg': r['msg']}
         l.append(d)
     print("Content-type: application/json\r\n")
     print(json.dumps(l))
