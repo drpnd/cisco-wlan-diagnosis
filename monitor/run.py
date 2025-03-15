@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-Copyright (c) 2023 Hirochika Asai <asai@jar.jp>
+Copyright (c) 2023,2025 Hirochika Asai <asai@jar.jp>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -78,7 +78,7 @@ def client_common_oper_data(db, c, ts, hwts, jm):
 """
 Cisco-IOS-XE-wireless-client-oper:client-oper-data/dot11-oper-data
 """
-def client_dot11_oper_data(db, c, ts, hwts, jm):
+def client_dot11_oper_data(db, c, ts, hwts, ms_mac_address, jm):
     sql = '''insert into client_dot11_oper_data (ts, hwts, ms_mac_address, ms_bssid, ap_mac_address, current_channel, ms_wlan_id, vap_ssid, policy_profile, ms_ap_slot_id, radio_type, ms_assoc_time, is_11g_client, wpa_version, cipher_suite, auth_key_mgmt, group_mgmt_cipher_suite, group_cipher_suite, pwe_mode, ewlc_ms_phy_type, encryption_type, dot11_6ghz_cap) values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'''
     v1 = False
     try:
@@ -92,8 +92,13 @@ def client_dot11_oper_data(db, c, ts, hwts, jm):
             v2 = True
     except:
         pass
+    pwe_mode = False
     try:
-        vals = (ts, hwts, jm['ms-mac-address'], jm['ms-bssid'], jm['ap-mac-address'], jm['current-channel'], jm['ms-wlan-id'], jm['vap-ssid'], jm['policy-profile'], jm['ms-ap-slot-id'], jm['radio-type'], jm['ms-assoc-time'], v1, jm['ms-wifi']['wpa-version'], jm['ms-wifi']['cipher-suite'], jm['ms-wifi']['auth-key-mgmt'], jm['ms-wifi']['group-mgmt-cipher-suite'], jm['ms-wifi']['group-cipher-suite'], jm['ms-wifi']['pwe-mode'], jm['ewlc-ms-phy-type'], jm['encryption-type'], v2)
+        pwe_mode = jm['ms-wifi']['pwe-mode']
+    except:
+        pass
+    try:
+        vals = (ts, hwts, ms_mac_address, jm['ms-bssid'], jm['ap-mac-address'], jm['current-channel'], jm['ms-wlan-id'], jm['vap-ssid'], jm['policy-profile'], jm['ms-ap-slot-id'], jm['radio-type'], jm['ms-assoc-time'], v1, jm['ms-wifi']['wpa-version'], jm['ms-wifi']['cipher-suite'], jm['ms-wifi']['auth-key-mgmt'], jm['ms-wifi']['group-mgmt-cipher-suite'], jm['ms-wifi']['group-cipher-suite'], pwe_mode, jm['ewlc-ms-phy-type'], jm['encryption-type'], v2)
         c.execute(sql, vals)
     except:
         print('client_dot11_oper_data', sql, jm)
@@ -175,8 +180,13 @@ def ap_radio_oper_data(db, c, ts, hwts, jm):
     vht = False
     if jm['phy-ht-cfg']['cfg-data']['vht-enable'] == 'true':
         vht = True
+    radio_subband = False
+    try:
+        radio_subband = jm['radio-subband']
+    except:
+        pass
     sql = '''insert into ap_radio_oper_data (ts, wtp_mac, radio_slot_id, slot_id, radio_type, admin_state, oper_state, radio_mode, radio_sub_mode, radio_subtype, radio_subband, ht_enable, phy_ht_cfg_config_type, curr_freq, chan_width, ext_chan, vht_enable, rrm_channel_change_reason) values(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'''
-    vals = (ts, jm['wtp-mac'], jm['radio-slot-id'], jm['slot-id'], jm['radio-type'], jm['admin-state'], jm['oper-state'], jm['radio-mode'], jm['radio-sub-mode'], jm['radio-subtype'], jm['radio-subband'], jm['phy-ht-cfg']['cfg-data']['ht-enable'], jm['phy-ht-cfg']['cfg-data']['phy-ht-cfg-config-type'], jm['phy-ht-cfg']['cfg-data']['curr-freq'], jm['phy-ht-cfg']['cfg-data']['chan-width'], jm['phy-ht-cfg']['cfg-data']['ext-chan'], vht, jm['phy-ht-cfg']['cfg-data']['rrm-channel-change-reason'])
+    vals = (ts, jm['wtp-mac'], jm['radio-slot-id'], jm['slot-id'], jm['radio-type'], jm['admin-state'], jm['oper-state'], jm['radio-mode'], jm['radio-sub-mode'], jm['radio-subtype'], radio_subband, jm['phy-ht-cfg']['cfg-data']['ht-enable'], jm['phy-ht-cfg']['cfg-data']['phy-ht-cfg-config-type'], jm['phy-ht-cfg']['cfg-data']['curr-freq'], jm['phy-ht-cfg']['cfg-data']['chan-width'], jm['phy-ht-cfg']['cfg-data']['ext-chan'], vht, jm['phy-ht-cfg']['cfg-data']['rrm-channel-change-reason'])
     c.execute(sql, vals)
     if 'vap-oper-config' in jm:
         try:
@@ -216,9 +226,9 @@ def main():
     db = mydb.connect()
     c = db.cursor()
 
+    xpath_dot11_oper_data = 'Cisco-IOS-XE-wireless-client-oper:client-oper-data/dot11-oper-data'
     xpathsets = [
         ['Cisco-IOS-XE-wireless-client-oper:client-oper-data/common-oper-data'],
-        ['Cisco-IOS-XE-wireless-client-oper:client-oper-data/dot11-oper-data'],
         ['Cisco-IOS-XE-wireless-client-oper:client-oper-data/traffic-stats'],
         ['Cisco-IOS-XE-wireless-client-oper:client-oper-data/sisf-db-mac'],
         ['Cisco-IOS-XE-wireless-access-point-oper:access-point-oper-data/radio-oper-data',
@@ -227,40 +237,50 @@ def main():
         ['Cisco-IOS-XE-wireless-rrm-oper:rrm-oper-data/rrm-measurement']
     ]
 
-    ## Use get instead of subscribe as subscribe has some issues
-    while True:
-        ts = int(time.time())
-        for xpaths in xpathsets:
-            response = client.get_xpaths(xpaths, data_type='STATE', encoding='JSON_IETF')
-            for msg in response.notification:
-                ## Timestamp
-                hwts = msg.timestamp
-                for um in msg.update:
-                    ## common-oper-data
-                    if um.path.elem[0].name == 'Cisco-IOS-XE-wireless-client-oper:client-oper-data':
-                        if um.path.elem[1].name == 'common-oper-data':
-                            client_common_oper_data(db, c, ts, hwts, json.loads(um.val.json_ietf_val))
-                        elif um.path.elem[1].name == 'dot11-oper-data':
-                            client_dot11_oper_data(db, c, ts, hwts, json.loads(um.val.json_ietf_val))
-                        elif um.path.elem[1].name == 'traffic-stats':
-                            client_traffic_stats(db, c, ts, hwts, json.loads(um.val.json_ietf_val))
-                        elif um.path.elem[1].name == 'sisf-db-mac':
-                            client_sisf_db_mac(db, c, ts, hwts, json.loads(um.val.json_ietf_val))
-                    elif um.path.elem[0].name == 'Cisco-IOS-XE-wireless-access-point-oper:access-point-oper-data':
-                        if um.path.elem[1].name == 'radio-oper-data':
-                            ap_radio_oper_data(db, c, ts, hwts, json.loads(um.val.json_ietf_val))
-                        elif um.path.elem[1].name == 'capwap-data':
-                            ap_capwap_data(db, c, ts, hwts, json.loads(um.val.json_ietf_val))
-                        elif um.path.elem[1].name == 'radio-oper-stats':
-                            ap_radio_oper_stats(db, c, ts, hwts, json.loads(um.val.json_ietf_val))
-                    elif um.path.elem[0].name == 'Cisco-IOS-XE-wireless-rrm-oper:rrm-oper-data':
-                        if um.path.elem[1].name == 'rrm-measurement':
-                            rrm_measurement(db, c, ts, hwts, json.loads(um.val.json_ietf_val))
-        ## data point
-        sql = '''insert into datapoints (ts) values(%s)'''
-        c.execute(sql, (ts, ))
-        db.commit()
-        time.sleep(interval)
+    ## Use subscribe for client-oper-data/dot11-oper-data as get seems no longer supported
+    for smsg in client.subscribe_xpaths(xpath_dot11_oper_data, encoding='JSON_IETF', sample_interval=interval * (10**9), sub_mode='SAMPLE'):
+        if smsg.sync_response:
+            pass
+        else:
+            ts = int(time.time())
+            hwts = smsg.update.timestamp
+            for um in smsg.update.update:
+                ## Verify the path
+                if um.path.elem[0].name == 'Cisco-IOS-XE-wireless-client-oper:client-oper-data':
+                    if um.path.elem[1].name == 'dot11-oper-data':
+                        client_dot11_oper_data(db, c, ts, hwts, um.path.elem[1].key['ms-mac-address'], json.loads(um.val.json_ietf_val))
+            ## The other xpaths
+            for xpaths in xpathsets:
+                response = client.get_xpaths(xpaths, data_type='STATE', encoding='JSON_IETF')
+                for msg in response.notification:
+                    ## Timestamp
+                    hwts = msg.timestamp
+                    for um in msg.update:
+                        ## common-oper-data
+                        if um.path.elem[0].name == 'Cisco-IOS-XE-wireless-client-oper:client-oper-data':
+                            if um.path.elem[1].name == 'common-oper-data':
+                                client_common_oper_data(db, c, ts, hwts, json.loads(um.val.json_ietf_val))
+                            #elif um.path.elem[1].name == 'dot11-oper-data':
+                            #    client_dot11_oper_data(db, c, ts, hwts, json.loads(um.val.json_ietf_val))
+                            elif um.path.elem[1].name == 'traffic-stats':
+                                client_traffic_stats(db, c, ts, hwts, json.loads(um.val.json_ietf_val))
+                            elif um.path.elem[1].name == 'sisf-db-mac':
+                                client_sisf_db_mac(db, c, ts, hwts, json.loads(um.val.json_ietf_val))
+                        elif um.path.elem[0].name == 'Cisco-IOS-XE-wireless-access-point-oper:access-point-oper-data':
+                            if um.path.elem[1].name == 'radio-oper-data':
+                                ap_radio_oper_data(db, c, ts, hwts, json.loads(um.val.json_ietf_val))
+                            elif um.path.elem[1].name == 'capwap-data':
+                                ap_capwap_data(db, c, ts, hwts, json.loads(um.val.json_ietf_val))
+                            elif um.path.elem[1].name == 'radio-oper-stats':
+                                ap_radio_oper_stats(db, c, ts, hwts, json.loads(um.val.json_ietf_val))
+                        elif um.path.elem[0].name == 'Cisco-IOS-XE-wireless-rrm-oper:rrm-oper-data':
+                            if um.path.elem[1].name == 'rrm-measurement':
+                                rrm_measurement(db, c, ts, hwts, json.loads(um.val.json_ietf_val))
+            ## data point
+            sql = '''insert into datapoints (ts) values(%s)'''
+            c.execute(sql, (ts, ))
+            db.commit()
+            time.sleep(interval)
 
 if __name__ == "__main__":
     main()
