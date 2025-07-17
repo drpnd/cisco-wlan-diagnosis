@@ -97,8 +97,13 @@ def client_dot11_oper_data(db, c, ts, hwts, ms_mac_address, jm):
         pwe_mode = jm['ms-wifi']['pwe-mode']
     except:
         pass
+    radio_type = None
     try:
-        vals = (ts, hwts, ms_mac_address, jm['ms-bssid'], jm['ap-mac-address'], jm['current-channel'], jm['ms-wlan-id'], jm['vap-ssid'], jm['policy-profile'], jm['ms-ap-slot-id'], jm['radio-type'], jm['ms-assoc-time'], v1, jm['ms-wifi']['wpa-version'], jm['ms-wifi']['cipher-suite'], jm['ms-wifi']['auth-key-mgmt'], jm['ms-wifi']['group-mgmt-cipher-suite'], jm['ms-wifi']['group-cipher-suite'], pwe_mode, jm['ewlc-ms-phy-type'], jm['encryption-type'], v2)
+        radio_type = jm['radio-type']
+    except:
+        pass
+    try:
+        vals = (ts, hwts, ms_mac_address, jm['ms-bssid'], jm['ap-mac-address'], jm['current-channel'], jm['ms-wlan-id'], jm['vap-ssid'], jm['policy-profile'], jm['ms-ap-slot-id'], radio_type, jm['ms-assoc-time'], v1, jm['ms-wifi']['wpa-version'], jm['ms-wifi']['cipher-suite'], jm['ms-wifi']['auth-key-mgmt'], jm['ms-wifi']['group-mgmt-cipher-suite'], jm['ms-wifi']['group-cipher-suite'], pwe_mode, jm['ewlc-ms-phy-type'], jm['encryption-type'], v2)
         c.execute(sql, vals)
     except:
         print('client_dot11_oper_data', sql, jm)
